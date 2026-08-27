@@ -20,7 +20,7 @@ app.use(
 
 app.use(express.json({ limit: '1mb' }))
 app.use(cookieParser())
-app.use(apiLimiter)
+{/*app.use(apiLimiter)*/}
 
 app.get('/health', (req, res) =>
   res.json({

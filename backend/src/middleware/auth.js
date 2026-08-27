@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken'
 import { env } from '../config/env.js'
+import { AppError } from '../utils/errors.js'
 
 export function authenticate(req, res, next) {
   const token = req.cookies.token
@@ -23,4 +24,11 @@ export function authenticate(req, res, next) {
       message: 'Invalid or expired token',
     })
   }
+}
+
+export function authorize(...roles) {
+  return (req, res, next) =>
+    roles.includes(req.user?.role)
+      ? next()
+      : next(new AppError('Forbidden', 403, 'FORBIDDEN'))
 }

@@ -44,7 +44,12 @@ function GuestRoute() {
   }
 
   if (user) {
-    return <Navigate to="/dashboard" replace />
+    return (
+      <Navigate
+        to={user.role === 'ADMIN' ? '/admin' : '/dashboard'}
+        replace
+      />
+    )
   }
 
   return <Outlet />

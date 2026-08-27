@@ -14,7 +14,7 @@ model User {
   email                    String                    @unique @db.VarChar(160)
   passwordHash             String                    @map("password_hash")
   role                     UserRole                  @default(USER)
-  updatedAt                DateTime                  @default(now()) @map("updated_at") @db.Timestamptz(6)
+  updatedAt                DateTime                  @updatedAt @map("updated_at") @db.Timestamptz(6)
   conversationParticipants ConversationParticipant[]
   receivedRequests         ExchangeRequest[]         @relation("ReceivedRequests")
   sentRequests             ExchangeRequest[]         @relation("SentRequests")
@@ -29,32 +29,33 @@ model User {
 }
 
 model Skill {
-  id               String            @id
+  id               String            @id @default(uuid())
   name             String            @unique @db.VarChar(120)
+  description      String?
   createdAt        DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
   offeredRequests  ExchangeRequest[] @relation("OfferedSkillRequests")
   wantedRequests   ExchangeRequest[] @relation("WantedSkillRequests")
   offeredExchanges Exchange[]        @relation("OfferedSkillExchanges")
   wantedExchanges  Exchange[]        @relation("WantedSkillExchanges")
   userSkills       UserSkill[]
-
   @@map("skills")
 }
 
 model UserSkill {
-  id      String    @id
-  userId  String    @map("user_id")
-  skillId String    @map("skill_id")
-  type    SkillType
-  skill   Skill     @relation(fields: [skillId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  user    User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id          String      @id @default(uuid())
+  userId      String      @map("user_id")
+  skillId     String      @map("skill_id")
+  type        SkillType
+  proficiency Proficiency
+  skill       Skill       @relation(fields: [skillId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@unique([userId, skillId, type])
+  @@unique([userId, skillId, type, proficiency])
   @@map("user_skills")
 }
 
 model ExchangeRequest {
-  id             String        @id
+  id             String        @id @default(uuid())
   senderId       String        @map("sender_id")
   recipientId    String        @map("recipient_id")
   offeredSkillId String        @map("offered_skill_id")
@@ -71,7 +72,7 @@ model ExchangeRequest {
 }
 
 model Exchange {
-  id             String          @id
+  id             String          @id @default(uuid())
   requestId      String          @unique @map("request_id")
   userAId        String          @map("user_a_id")
   userBId        String          @map("user_b_id")
@@ -91,7 +92,7 @@ model Exchange {
 }
 
 model Conversation {
-  id           String                    @id
+  id           String                    @id @default(uuid())
   createdAt    DateTime                  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt    DateTime                  @default(now()) @map("updated_at") @db.Timestamptz(6)
   participants ConversationParticipant[]
@@ -101,7 +102,7 @@ model Conversation {
 }
 
 model ConversationParticipant {
-  id             String       @id
+  id             String       @id @default(uuid())
   conversationId String       @map("conversation_id")
   userId         String       @map("user_id")
   joinedAt       DateTime     @default(now()) @map("joined_at") @db.Timestamptz(6)
@@ -113,7 +114,7 @@ model ConversationParticipant {
 }
 
 model Message {
-  id             String       @id
+  id             String       @id @default(uuid())
   conversationId String       @map("conversation_id")
   senderId       String       @map("sender_id")
   content        String
@@ -126,7 +127,7 @@ model Message {
 }
 
 model Review {
-  id         String   @id
+  id         String   @id @default(uuid())
   exchangeId String   @map("exchange_id")
   reviewerId String   @map("reviewer_id")
   revieweeId String   @map("reviewee_id")
@@ -169,4 +170,13 @@ enum ExchangeStatus {
   CANCELLED
 
   @@map("exchange_status")
+}
+
+enum Proficiency {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+
+  @@map("proficiency")
 }

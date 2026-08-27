@@ -18,11 +18,21 @@ dist-ssr/
 # Environment variables
 .env
 .env.*
-!.env.example
+
+# Testing / coverage
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+
+# Cache / temporary
+.cache/
+.tmp/
+temp/
+*.tmp
 
 # Editor directories and files
 .vscode/*
-!.vscode/extensions.json
 .idea/
 .DS_Store
 *.suo

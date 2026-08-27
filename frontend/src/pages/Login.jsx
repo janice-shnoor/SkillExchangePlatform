@@ -34,7 +34,7 @@ function Login() {
       setEmail('')
       setPassword('')
 
-      navigate('/dashboard')
+      navigate(data.user.role === 'ADMIN' ? '/admin' : '/dashboard')
     } catch (error) {
       setError(error.message)
     }
