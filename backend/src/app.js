@@ -1,17 +1,41 @@
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-require('dotenv').config();
+import express from 'express'
+import cors from 'cors'
+import helmet from 'helmet'
+import { env } from './config/env.js'
+import { apiLimiter } from './middleware/rateLimit.js'
+import routes from './routes/index.js'
+import { errorHandler } from './utils/errors.js'
+import cookieParser from 'cookie-parser'
 
-const app = express();
+export const app = express()
 
-app.use(cors());
-app.use(helmet());
-app.use(express.json()); // for parsing JSON bodies
+app.use(helmet())
 
-app.get('/', (req, res) => {
-  res.send('API is running...');
-});
+app.use(
+  cors({
+    origin: env.CORS_ORIGIN.split(',').map(x => x.trim()),
+    credentials: true,
+  })
+)
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+app.use(express.json({ limit: '1mb' }))
+app.use(cookieParser())
+app.use(apiLimiter)
+
+app.get('/health', (req, res) =>
+  res.json({
+    status: 'ok',
+    service: env.APP_NAME
+  })
+)
+
+app.use('/api', routes)
+
+app.use((req, res) =>
+  res.status(404).json({
+    success: false,
+    message: 'Route not found'
+  })
+)
+
+app.use(errorHandler)
