@@ -46,8 +46,7 @@ export async function removeUserSkill(req, res, next) {
   try {
     await service.removeUserSkill(
       req.user.sub,
-      req.params.skillId,
-      req.params.type
+      req.params.id
     )
 
     res.status(200).json({

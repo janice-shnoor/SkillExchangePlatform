@@ -48,14 +48,28 @@ export async function addUserSkill(userId, data) {
   })
 }
 
-export async function removeUserSkill(userId, skillId, type) {
+export async function removeUserSkill(userId, userSkillId) {
+  const userSkill = await prisma.userSkill.findUnique({
+    where: {
+      id: userSkillId,
+    },
+  })
+
+  if (!userSkill) {
+    const error = new Error('Skill not found')
+    error.statusCode = 404
+    throw error
+  }
+
+  if (userSkill.userId !== userId) {
+    const error = new Error('You are not allowed to remove this skill')
+    error.statusCode = 403
+    throw error
+  }
+
   return prisma.userSkill.delete({
     where: {
-      userId_skillId_type: {
-        userId,
-        skillId,
-        type,
-      },
+      id: userSkillId,
     },
   })
 }

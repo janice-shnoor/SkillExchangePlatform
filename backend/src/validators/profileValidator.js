@@ -26,14 +26,3 @@ export const addUserSkillSchema = z.object({
   params: z.object({}),
   query: z.object({}),
 })
-
-export const removeUserSkillSchema = z.object({
-  body: z.object({}).optional(),
-
-  params: z.object({
-    skillId: z.string().uuid(),
-    type: z.enum(['OFFERED', 'WANTED']),
-  }),
-
-  query: z.object({}),
-})

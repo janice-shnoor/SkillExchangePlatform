@@ -21,7 +21,6 @@ import { validate } from '../middleware/validate.js'
 import {
   updateProfileSchema,
   addUserSkillSchema,
-  removeUserSkillSchema,
 } from '../validators/profileValidator.js'
 
 const router = Router()
@@ -59,9 +58,8 @@ router.post(
 )
 
 router.delete(
-  '/skills/:skillId/:type',
+  '/skills/:id',
   authenticate,
-  validate(removeUserSkillSchema),
   removeUserSkill
 )
 

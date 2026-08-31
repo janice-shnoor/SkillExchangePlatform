@@ -55,12 +55,17 @@ function ProfileSkills() {
 
       const data = await res.json()
       if (!res.ok) throw new Error(data.message || 'Request failed')
+        
 
       const list = form.type === 'OFFERED' ? setOffered : setWanted
       list((current) => [...current, data.userSkill])
       setAdding(false)
     } catch (err) {
-      setError(err.message)
+      setError(
+        err.message.includes('Unique constraint failed')
+          ? 'Duplicate Entries are not allowed.'
+          : err.message
+      )
     } finally {
       setActionLoading(false)
     }
@@ -71,15 +76,22 @@ function ProfileSkills() {
       setActionLoading(true)
       setError('')
 
-      await fetch(
-        `${API_URL}/profile/skills/${deleting.skillId}/${deleting.type}`,
+      const res = await fetch(
+        `${API_URL}/profile/skills/${deleting.id}`,
         {
           method: 'DELETE',
           credentials: 'include',
         }
       )
 
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.message || 'Unable to remove skill')
+      }
+
       const list = deleting.type === 'OFFERED' ? setOffered : setWanted
+
       list((current) =>
         current.filter((item) => item.id !== deleting.id)
       )
@@ -202,12 +214,6 @@ function ProfileSkills() {
           </button>
         </div>
 
-        {error && (
-          <p className="mt-5 rounded-lg bg-red-50 px-4 py-3 text-sm text-[var(--error)]">
-            {error}
-          </p>
-        )}
-
         {loading ? (
           <p className="mt-8 text-sm text-[var(--text-muted)]">
             Loading skills...
@@ -242,6 +248,7 @@ function ProfileSkills() {
             proficiency: '',
           }}
           loading={actionLoading}
+          error={error}
           submitLabel="Add Skill"
           onSubmit={addSkill}
           onClose={() => setAdding(false)}
