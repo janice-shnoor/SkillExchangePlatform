@@ -136,11 +136,11 @@ export async function getRecommendations(userId) {
     )
 
     const matchScore = wantedMatches.length*3 + offeredMatches.length
-    const noSkills = wantedMatches.length + offeredMatches.length
+    const count = wantedMatches.length + offeredMatches.length
 
     return {
       ...user,
-      noSkills,
+      count,
       _matchScore:matchScore,
     }
   })

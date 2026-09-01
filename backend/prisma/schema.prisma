@@ -8,22 +8,21 @@ datasource db {
 }
 
 model User {
-  id                       String                    @id @default(uuid())
-  username                 String                    @unique @db.VarChar(30)
-  name                     String                    @db.VarChar(80)
-  email                    String                    @unique @db.VarChar(160)
-  passwordHash             String                    @map("password_hash")
-  role                     UserRole                  @default(USER)
-  updatedAt                DateTime                  @updatedAt @map("updated_at") @db.Timestamptz(6)
-  conversationParticipants ConversationParticipant[]
-  receivedRequests         ExchangeRequest[]         @relation("ReceivedRequests")
-  sentRequests             ExchangeRequest[]         @relation("SentRequests")
-  exchangesAsUserA         Exchange[]                @relation("ExchangesAsUserA")
-  exchangesAsUserB         Exchange[]                @relation("ExchangesAsUserB")
-  messages                 Message[]                 @relation("MessageSender")
-  reviewsReceived          Review[]                  @relation("ReviewsReceived")
-  reviewsGiven             Review[]                  @relation("ReviewsGiven")
-  userSkills               UserSkill[]
+  id               String            @id @default(uuid())
+  username         String            @unique @db.VarChar(30)
+  name             String            @db.VarChar(80)
+  email            String            @unique @db.VarChar(160)
+  passwordHash     String            @map("password_hash")
+  role             UserRole          @default(USER)
+  updatedAt        DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+  receivedRequests ExchangeRequest[] @relation("ReceivedRequests")
+  sentRequests     ExchangeRequest[] @relation("SentRequests")
+  exchangesAsUserA Exchange[]        @relation("ExchangesAsUserA")
+  exchangesAsUserB Exchange[]        @relation("ExchangesAsUserB")
+  messages         Message[]         @relation("MessageSender")
+  reviewsReceived  Review[]          @relation("ReviewsReceived")
+  reviewsGiven     Review[]          @relation("ReviewsGiven")
+  userSkills       UserSkill[]
 
   @@map("users")
 }
@@ -43,87 +42,78 @@ model Skill {
 }
 
 model UserSkill {
-  id          String       @id @default(uuid())
-  userId      String       @map("user_id")
-  skillId     String       @map("skill_id")
+  id          String      @id @default(uuid())
+  userId      String      @map("user_id")
+  skillId     String      @map("skill_id")
   type        SkillType
   proficiency Proficiency
-  skill       Skill        @relation(fields: [skillId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  skill       Skill       @relation(fields: [skillId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([userId, skillId, type, proficiency])
   @@map("user_skills")
 }
 
 model ExchangeRequest {
-  id             String        @id @default(uuid())
-  senderId       String        @map("sender_id")
-  recipientId    String        @map("recipient_id")
-  offeredSkillId String        @map("offered_skill_id")
-  wantedSkillId  String        @map("wanted_skill_id")
-  status         RequestStatus @default(PENDING)
-  updatedAt      DateTime      @default(now()) @map("updated_at") @db.Timestamptz(6)
-  offeredSkill   Skill         @relation("OfferedSkillRequests", fields: [offeredSkillId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  recipient      User          @relation("ReceivedRequests", fields: [recipientId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  sender         User          @relation("SentRequests", fields: [senderId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  wantedSkill    Skill         @relation("WantedSkillRequests", fields: [wantedSkillId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  exchange       Exchange?
+  id                  String        @id @default(uuid())
+  senderId            String?       @map("sender_id")
+  receiverId          String?       @map("receiver_id")
+  senderUsername      String        @map("sender_username")
+  receiverUsername    String        @map("receiver_username")
+  senderSkillId       String?       @map("sender_skill_id")
+  senderSkillName     String        @map("sender_skill_name")
+  senderProficiency   Proficiency   @map("sender_proficiency")
+  receiverSkillId     String?       @map("receiver_skill_id")
+  receiverSkillName   String        @map("receiver_skill_name")
+  receiverProficiency Proficiency   @map("receiver_proficiency")
+  status              RequestStatus @default(PENDING)
+  createdAt           DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+  sender              User?         @relation("SentRequests", fields: [senderId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  receiver            User?         @relation("ReceivedRequests", fields: [receiverId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  senderSkill         Skill?        @relation("OfferedSkillRequests", fields: [senderSkillId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  receiverSkill       Skill?        @relation("WantedSkillRequests", fields: [receiverSkillId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  exchange            Exchange?
 
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([status])
   @@map("exchange_requests")
 }
 
 model Exchange {
-  id             String          @id @default(uuid())
-  requestId      String          @unique @map("request_id")
-  userAId        String          @map("user_a_id")
-  userBId        String          @map("user_b_id")
-  offeredSkillId String          @map("offered_skill_id")
-  wantedSkillId  String          @map("wanted_skill_id")
-  status         ExchangeStatus  @default(ACTIVE)
-  createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
-  completedAt    DateTime?       @map("completed_at") @db.Timestamptz(6)
-  offeredSkill   Skill           @relation("OfferedSkillExchanges", fields: [offeredSkillId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  request        ExchangeRequest @relation(fields: [requestId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  userA          User            @relation("ExchangesAsUserA", fields: [userAId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  userB          User            @relation("ExchangesAsUserB", fields: [userBId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  wantedSkill    Skill           @relation("WantedSkillExchanges", fields: [wantedSkillId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  reviews        Review[]
+  id          String          @id @default(uuid())
+  requestId   String          @unique @map("request_id")
+  userAId     String          @map("user_a_id")
+  userBId     String          @map("user_b_id")
+  skillAId    String          @map("skill_a_id")
+  skillBId    String          @map("skill_b_id")
+  status      ExchangeStatus  @default(ACTIVE)
+  createdAt   DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  completedAt DateTime?       @map("completed_at") @db.Timestamptz(6)
+  request     ExchangeRequest @relation(fields: [requestId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  userA       User            @relation("ExchangesAsUserA", fields: [userAId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  userB       User            @relation("ExchangesAsUserB", fields: [userBId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  skillA      Skill           @relation("OfferedSkillExchanges", fields: [skillAId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  skillB      Skill           @relation("WantedSkillExchanges", fields: [skillBId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  messages    Message[]
+  reviews     Review[]
 
   @@map("exchanges")
 }
 
-model Conversation {
-  id           String                    @id @default(uuid())
-  createdAt    DateTime                  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt    DateTime                  @default(now()) @map("updated_at") @db.Timestamptz(6)
-  participants ConversationParticipant[]
-  messages     Message[]
-
-  @@map("conversations")
-}
-
-model ConversationParticipant {
-  id             String       @id @default(uuid())
-  conversationId String       @map("conversation_id")
-  userId         String       @map("user_id")
-  joinedAt       DateTime     @default(now()) @map("joined_at") @db.Timestamptz(6)
-  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@unique([conversationId, userId])
-  @@map("conversation_participants")
-}
-
 model Message {
-  id             String       @id @default(uuid())
-  conversationId String       @map("conversation_id")
-  senderId       String       @map("sender_id")
-  content        String
-  readAt         DateTime?    @map("read_at") @db.Timestamptz(6)
-  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
-  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  sender         User         @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id         String    @id @default(uuid())
+  exchangeId String    @map("exchange_id")
+  senderId   String    @map("sender_id")
+  content    String
+  readAt     DateTime? @map("read_at")
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  exchange   Exchange  @relation(fields: [exchangeId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  sender     User      @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
+  @@index([exchangeId])
+  @@index([senderId])
   @@map("messages")
 }
 
@@ -136,8 +126,8 @@ model Review {
   comment    String?
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   exchange   Exchange @relation(fields: [exchangeId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  reviewee   User     @relation("ReviewsReceived", fields: [revieweeId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   reviewer   User     @relation("ReviewsGiven", fields: [reviewerId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  reviewee   User     @relation("ReviewsReceived", fields: [revieweeId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([exchangeId, reviewerId])
   @@map("reviews")
@@ -161,6 +151,7 @@ enum RequestStatus {
   PENDING
   ACCEPTED
   REJECTED
+  CANCELLED
 
   @@map("request_status")
 }

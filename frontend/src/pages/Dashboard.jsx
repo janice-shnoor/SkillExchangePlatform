@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import ExchangeRequestRow from '../components/ExchangeRequestRow'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -20,6 +21,8 @@ function Dashboard() {
   const [user, setUser] = useState(null)
   const [offered, setOffered] = useState([])
   const [wanted, setWanted] = useState([])
+  const [sentRequests, setSentRequests] = useState([])
+  const [receivedRequests, setReceivedRequests] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -28,12 +31,24 @@ function Dashboard() {
       fetchData('/profile'),
       fetchData('/profile/skills/offered'),
       fetchData('/profile/skills/wanted'),
+      fetchData('/exchange-requests/sent'),
+      fetchData('/exchange-requests/received'),
     ])
-      .then(([profile, offeredData, wantedData]) => {
-        setUser(profile.user)
-        setOffered(offeredData.skills)
-        setWanted(wantedData.skills)
-      })
+      .then(
+        ([
+          profile,
+          offeredData,
+          wantedData,
+          sentData,
+          receivedData,
+        ]) => {
+          setUser(profile.user)
+          setOffered(offeredData.skills)
+          setWanted(wantedData.skills)
+          setSentRequests(sentData.requests)
+          setReceivedRequests(receivedData.requests)
+        }
+      )
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false))
   }, [])
@@ -53,6 +68,9 @@ function Dashboard() {
       </p>
     )
   }
+
+  const recentSentRequests = sentRequests.slice(0, 3)
+  const recentReceivedRequests = receivedRequests.slice(0, 3)
 
   const SkillList = ({ skills }) => (
     skills.length ? (
@@ -82,6 +100,7 @@ function Dashboard() {
 
   return (
     <div className="w-full space-y-8">
+      {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-[var(--text)]">
           Dashboard
@@ -92,7 +111,7 @@ function Dashboard() {
         </p>
       </div>
 
-      {/* Account summary */}
+      {/* Profile */}
       <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
         <div className="p-6 sm:p-8">
           <div className="flex items-center gap-4">
@@ -116,6 +135,7 @@ function Dashboard() {
               <p className="text-xs font-medium uppercase tracking-wide text-[var(--text-muted)]">
                 Email
               </p>
+
               <p className="mt-1.5 text-sm text-[var(--text)]">
                 {user.email}
               </p>
@@ -125,6 +145,7 @@ function Dashboard() {
               <p className="text-xs font-medium uppercase tracking-wide text-[var(--text-muted)]">
                 Role
               </p>
+
               <span className="mt-1.5 inline-flex rounded-full bg-[var(--primary-subtle)] px-2.5 py-1 text-xs font-medium text-[var(--primary-hover)]">
                 {user.role}
               </span>
@@ -134,6 +155,7 @@ function Dashboard() {
               <p className="text-xs font-medium uppercase tracking-wide text-[var(--text-muted)]">
                 Skills
               </p>
+
               <p className="mt-1.5 text-sm text-[var(--text)]">
                 {offered.length + wanted.length}
               </p>
@@ -142,48 +164,99 @@ function Dashboard() {
         </div>
       </section>
 
-      {/* Skills summary */}
-      <section className="grid gap-6 sm:grid-cols-2">
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-semibold text-[var(--text)]">
-                Offered Skills
-              </h2>
+      {/* Dashboard Overview */}
+      <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+        {/* Recent Requests */}
+        <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
+          <div className="p-6 pb-4 sm:p-8 sm:pb-5">
+            <h2 className="text-lg font-semibold text-[var(--text)]">
+              Recent Requests
+            </h2>
 
-              <p className="mt-1 text-sm text-[var(--text-muted)]">
-                Skills you can teach.
-              </p>
-            </div>
-
-            <span className="text-2xl font-semibold text-[var(--text)]">
-              {offered.length}
-            </span>
+            <p className="mt-1 text-sm text-[var(--text-muted)]">
+              Your latest exchange activity.
+            </p>
           </div>
 
-          <SkillList skills={offered} />
-        </div>
+          {/* Sent */}
+          <div className="px-6 pb-6 sm:px-8 sm:pb-8">
+            <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-[var(--text-muted)]">
+              Sent
+            </p>
 
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-semibold text-[var(--text)]">
-                Wanted Skills
-              </h2>
-
-              <p className="mt-1 text-sm text-[var(--text-muted)]">
-                Skills you want to learn.
+            {recentSentRequests.length > 0 ? (
+              <div className="rounded-xl border border-[var(--border)]">
+                {recentSentRequests.map((request) => (
+                  <ExchangeRequestRow
+                    key={request.id}
+                    request={request}
+                    type="sent"
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-[var(--text-muted)]">
+                No sent requests yet.
               </p>
-            </div>
-
-            <span className="text-2xl font-semibold text-[var(--text)]">
-              {wanted.length}
-            </span>
+            )}
           </div>
 
-          <SkillList skills={wanted} />
-        </div>
-      </section>
+          {/* Divider */}
+          <div className="border-t border-[var(--border)]" />
+
+          {/* Received */}
+          <div className="p-6 pt-6 sm:p-8 sm:pt-7">
+            <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-[var(--text-muted)]">
+              Received
+            </p>
+
+            {recentReceivedRequests.length > 0 ? (
+              <div className="rounded-xl border border-[var(--border)]">
+                {recentReceivedRequests.map((request) => (
+                  <ExchangeRequestRow
+                    key={request.id}
+                    request={request}
+                    type="received"
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-[var(--text-muted)]">
+                No received requests yet.
+              </p>
+            )}
+          </div>
+        </section>
+
+        {/* Current Skills */}
+        <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8">
+          <div>
+            <h2 className="text-lg font-semibold text-[var(--text)]">
+              Current Skills
+            </h2>
+
+            <p className="mt-1 text-sm text-[var(--text-muted)]">
+              What you can offer and what you want to learn.
+            </p>
+          </div>
+
+          <div className="mt-7">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-[var(--primary-hover)]">
+              Offers
+            </p>
+
+            <SkillList skills={offered} />
+          </div>
+
+          <div className="mt-8 border-t border-[var(--border)] pt-7">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-[var(--text-muted)]">
+              Wants to Learn
+            </p>
+
+            <SkillList skills={wanted} />
+          </div>
+        </section>
+      </div>
     </div>
   )
 }

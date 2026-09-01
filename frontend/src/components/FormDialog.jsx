@@ -101,6 +101,7 @@ function FormDialog({
                   onChange={handleChange}
                   placeholder={field.placeholder}
                   required={field.required}
+                  readOnly={field.readOnly}
                   className={inputClass}
                 />
               )}

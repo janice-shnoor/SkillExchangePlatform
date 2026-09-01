@@ -1,13 +1,299 @@
-function Exchanges() {
-  return (
-    <div>
-      <h1 className="text-3xl font-bold text-[var(--accent)]">
-        Exchanges
-      </h1>
+import { useEffect, useState } from 'react'
+import ExchangeRequestCard from '../components/ExchangeRequestRow'
+import AdminTable from '../components/AdminTable'
 
-      <p className="mt-2 text-[var(--text-muted)]">
-        Exchanges page placeholder
-      </p>
+
+const API_URL = import.meta.env.VITE_API_URL
+
+function Exchanges() {
+  const [activeTab, setActiveTab] = useState('current')
+  const [sentRequests, setSentRequests] = useState([])
+  const [receivedRequests, setReceivedRequests] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [actionLoading, setActionLoading] = useState('')
+
+  async function fetchRequests(path) {
+    const response = await fetch(`${API_URL}${path}`, {
+      credentials: 'include',
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to load requests')
+    }
+
+    return data.requests
+  }
+
+  async function loadRequests() {
+    try {
+      setLoading(true)
+      setError('')
+
+      const [sent, received] = await Promise.all([
+        fetchRequests('/exchange-requests/sent'),
+        fetchRequests('/exchange-requests/received'),
+      ])
+
+      setSentRequests(sent)
+      setReceivedRequests(received)
+    } catch (error) {
+      setError(error.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadRequests()
+  }, [])
+
+  async function handleAction(requestId, action) {
+    try {
+      setActionLoading(requestId)
+      setError('')
+
+      const response = await fetch(
+        `${API_URL}/exchange-requests/${requestId}/${action}`,
+        {
+          method: 'PATCH',
+          credentials: 'include',
+        }
+      )
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.message || `Failed to ${action} request`)
+      }
+
+      await loadRequests()
+    } catch (error) {
+      setError(error.message)
+    } finally {
+      setActionLoading('')
+    }
+  }
+
+  const pendingSentRequests = sentRequests.filter(
+    (request) => request.status === 'PENDING'
+  )
+
+  const pendingReceivedRequests = receivedRequests.filter(
+    (request) => request.status === 'PENDING'
+  )
+
+  const archivedRequests = [
+    ...sentRequests.map((request) => ({
+      ...request,
+      direction: 'To',
+      username: request.receiverUsername,
+    })),
+    ...receivedRequests.map((request) => ({
+      ...request,
+      direction: 'From',
+      username: request.senderUsername,
+    })),
+  ]
+    .filter((request) => request.status !== 'PENDING')
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt) - new Date(a.createdAt)
+    )
+
+  function formatProficiency(value) {
+    return value.charAt(0) + value.slice(1).toLowerCase()
+  }
+
+  const archivedColumns = [
+    {
+      key: 'direction',
+      label: 'Direction',
+    },
+    {
+      key: 'username',
+      label: 'User',
+      render: (request) => `@${request.username}`,
+    },
+    {
+      key: 'senderSkillName',
+      label: 'Offers',
+      render: (request) =>
+        `${request.senderSkillName} · ${formatProficiency(
+          request.senderProficiency
+        )}`,
+    },
+    {
+      key: 'receiverSkillName',
+      label: 'Wants to Learn',
+      render: (request) =>
+        `${request.receiverSkillName} · ${formatProficiency(
+          request.receiverProficiency
+        )}`,
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      render: (request) => {
+        const statusStyles = {
+          ACCEPTED:
+            'bg-[var(--success)]/10 text-[var(--success)] border-[var(--success)]/20',
+          REJECTED:
+            'bg-[var(--error)]/10 text-[var(--error)] border-[var(--error)]/20',
+          CANCELLED:
+            'bg-[var(--warning)]/10 text-[var(--warning)] border-[var(--warning)]/20',
+        }
+
+        return (
+          <span
+            className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide ${
+              statusStyles[request.status]
+            }`}
+          >
+            {request.status}
+          </span>
+        )
+      },
+    },
+    {
+      key: 'createdAt',
+      label: 'Date',
+      render: (request) =>
+        new Date(request.createdAt).toLocaleDateString(),
+    },
+  ]
+
+  return (
+    <div className="space-y-8">
+      {/* Header */}
+      <div>
+        <h1 className="text-3xl font-bold text-[var(--text)]">
+          Manage Exchanges
+        </h1>
+
+        {/*<p className="mt-2 text-[var(--text-muted)]">
+          Manage your exchange requests.
+        </p>*/}
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-8 border-b border-[var(--border)]">
+        {['current', 'archived'].map((tab) => (
+          <button
+            key={tab}
+            type="button"
+            onClick={() => setActiveTab(tab)}
+            className={`pb-3 text-sm font-medium capitalize ${
+              activeTab === tab
+                ? 'border-b-2 border-[var(--primary)] text-[var(--text)]'
+                : 'text-[var(--text-muted)]'
+            }`}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
+
+      {/* Loading */}
+      {loading && (
+        <p className="text-sm text-[var(--text-muted)]">
+          Loading requests...
+        </p>
+      )}
+
+      {/* Error */}
+      {!loading && error && (
+        <p className="text-sm text-[var(--error)]">
+          {error}
+        </p>
+      )}
+
+      {/* Current */}
+      {!loading && !error && activeTab === 'current' && (
+        <div className="space-y-10">
+          
+          {/* Received */}
+          <section>
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold text-[var(--text)]">
+                Received
+              </h2>
+              {/*<p className="mt-1 text-sm text-[var(--text-muted)]">
+                Pending requests waiting for your response.
+              </p>*/}
+            </div>
+
+            {pendingReceivedRequests.length > 0 ? (
+              <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)]">
+                {pendingReceivedRequests.map((request) => (
+                  <ExchangeRequestCard
+                    key={request.id}
+                    request={request}
+                    type="received"
+                    onAccept={(id) => handleAction(id, 'accept')}
+                    onReject={(id) => handleAction(id, 'reject')}
+                    loading={actionLoading === request.id}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-[var(--text-muted)]">
+                No pending received requests.
+              </p>
+            )}
+          </section>
+
+          {/* Sent */}
+          <section className="border-t border-[var(--border)] pt-8">
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold text-[var(--text)]">
+                Sent
+              </h2>
+              {/*<p className="mt-1 text-sm text-[var(--text-muted)]">
+                Pending requests you have sent.
+              </p>*/}
+            </div>
+
+            {pendingSentRequests.length > 0 ? (
+              <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)]">
+                {pendingSentRequests.map((request) => (
+                  <ExchangeRequestCard
+                    key={request.id}
+                    request={request}
+                    type="sent"
+                    onCancel={(id) => handleAction(id, 'cancel')}
+                    loading={actionLoading === request.id}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-[var(--text-muted)]">
+                No pending sent requests.
+              </p>
+            )}
+          </section>
+        </div>
+      )}
+
+      {/* Archived */}
+      {!loading && !error && activeTab === 'archived' && (
+        <section>
+          {archivedRequests.length > 0 ? (
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)]">
+              <AdminTable
+                columns={archivedColumns}
+                data={archivedRequests}
+              />
+            </div>
+          ) : (
+            <p className="text-sm text-[var(--text-muted)]">
+              No archived requests.
+            </p>
+          )}
+        </section>
+      )}
     </div>
   )
 }
