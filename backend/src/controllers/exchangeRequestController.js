@@ -52,7 +52,7 @@ export async function getSent(req, res, next) {
 
 export async function acceptRequest(req, res, next) {
   try {
-    const request = await acceptExchangeRequest(
+    const result = await acceptExchangeRequest(
       req.params.id,
       req.user.sub
     )
@@ -60,7 +60,8 @@ export async function acceptRequest(req, res, next) {
     res.status(200).json({
       success: true,
       message: 'Exchange request accepted',
-      request,
+      exchange: result.exchange,
+      request: result.request,
     })
   } catch (error) {
     next(error)

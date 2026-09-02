@@ -48,7 +48,6 @@ const router = createBrowserRouter([
           { path: '/dashboard', element: <Dashboard /> },
           { path: '/discover', element: <Discover /> },
           { path: '/profile', element: <Profile /> },
-          { path: '/messaging', element: <Messaging /> },
           { path: '/exchanges', element: <Exchanges /> },
 
           {
@@ -59,6 +58,12 @@ const router = createBrowserRouter([
           },
         ],
       },
+    ],
+  },
+  {
+    element: <ProtectedRoute />,
+    children: [
+      { path: '/messaging', element: <Messaging /> },
     ],
   },
 ])

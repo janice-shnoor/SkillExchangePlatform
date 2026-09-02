@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import ExchangeRequestRow from '../components/ExchangeRequestRow'
+import Table from '../components/Table'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -25,6 +26,57 @@ function Dashboard() {
   const [receivedRequests, setReceivedRequests] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [exchanges, setExchanges] = useState([])
+
+  const recentExchangeColumns = [
+    {
+      key: 'user',
+      label: 'User',
+      render: (exchange) => {
+        const otherUser =
+          exchange.userAId === user?.id
+            ? exchange.userB
+            : exchange.userA
+
+        return `@${otherUser.username}`
+      },
+    },
+    {
+      key: 'skills',
+      label: 'Skills',
+      render: (exchange) => {
+        const isUserA = exchange.userAId === user?.id
+
+        return isUserA
+          ? `${exchange.skillA.name} ↔ ${exchange.skillB.name}`
+          : `${exchange.skillB.name} ↔ ${exchange.skillA.name}`
+      },
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      render: (exchange) => {
+        const statusStyles = {
+          ACTIVE:
+            'bg-[var(--primary)]/10 text-[var(--primary)] border-[var(--primary)]/20',
+          COMPLETED:
+            'bg-[var(--success)]/10 text-[var(--success)] border-[var(--success)]/20',
+          CANCELLED:
+            'bg-[var(--warning)]/10 text-[var(--warning)] border-[var(--warning)]/20',
+        }
+
+        return (
+          <span
+            className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide ${
+              statusStyles[exchange.status]
+            }`}
+          >
+            {exchange.status}
+          </span>
+        )
+      },
+    },
+  ]
 
   useEffect(() => {
     Promise.all([
@@ -33,6 +85,7 @@ function Dashboard() {
       fetchData('/profile/skills/wanted'),
       fetchData('/exchange-requests/sent'),
       fetchData('/exchange-requests/received'),
+      fetchData('/exchange')
     ])
       .then(
         ([
@@ -41,12 +94,14 @@ function Dashboard() {
           wantedData,
           sentData,
           receivedData,
+          exchangeData,
         ]) => {
           setUser(profile.user)
           setOffered(offeredData.skills)
           setWanted(wantedData.skills)
           setSentRequests(sentData.requests)
           setReceivedRequests(receivedData.requests)
+          setExchanges(exchangeData.exchanges)
         }
       )
       .catch((err) => setError(err.message))
@@ -71,6 +126,7 @@ function Dashboard() {
 
   const recentSentRequests = sentRequests.slice(0, 3)
   const recentReceivedRequests = receivedRequests.slice(0, 3)
+  const recentExchanges = exchanges.slice(0, 5)
 
   const SkillList = ({ skills }) => (
     skills.length ? (
@@ -165,7 +221,7 @@ function Dashboard() {
       </section>
 
       {/* Dashboard Overview */}
-      <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+      <div className="grid gap-6 lg:grid-cols-[3fr_2fr]">
         {/* Recent Requests */}
         <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
           <div className="p-6 pb-4 sm:p-8 sm:pb-5">
@@ -228,32 +284,29 @@ function Dashboard() {
           </div>
         </section>
 
-        {/* Current Skills */}
+        {/* Recent Exchanges */}
         <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8">
           <div>
             <h2 className="text-lg font-semibold text-[var(--text)]">
-              Current Skills
+              Exchanges
             </h2>
 
             <p className="mt-1 text-sm text-[var(--text-muted)]">
-              What you can offer and what you want to learn.
+              Your most recent skill exchanges.
             </p>
           </div>
 
-          <div className="mt-7">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-[var(--primary-hover)]">
-              Offers
-            </p>
-
-            <SkillList skills={offered} />
-          </div>
-
-          <div className="mt-8 border-t border-[var(--border)] pt-7">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-[var(--text-muted)]">
-              Wants to Learn
-            </p>
-
-            <SkillList skills={wanted} />
+          <div className="mt-7 overflow-hidden rounded-xl border border-[var(--border)]">
+            {recentExchanges.length > 0 ? (
+              <Table
+                columns={recentExchangeColumns}
+                data={recentExchanges}
+              />
+            ) : (
+              <p className="p-5 text-sm text-[var(--text-muted)]">
+                No exchanges yet.
+              </p>
+            )}
           </div>
         </section>
       </div>

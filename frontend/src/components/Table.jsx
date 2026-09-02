@@ -1,4 +1,4 @@
-function AdminTable({ columns, data, renderActions }) {
+function Table({ columns, data, renderActions }) {
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
@@ -51,4 +51,4 @@ function AdminTable({ columns, data, renderActions }) {
   )
 }
 
-export default AdminTable
+export default Table

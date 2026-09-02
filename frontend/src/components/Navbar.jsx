@@ -26,7 +26,7 @@ function Navbar() {
 
         {/* Logo */}
         <Link
-          to="/"
+          to="/dashboard"
           className="mr-auto text-xl font-bold"
           style={{ color: 'var(--primary)' }}
         >
@@ -44,12 +44,12 @@ function Navbar() {
             <Search size={20} />
           </Link>
 
-          <Link to="/messaging" title="Messages">
-            <MessageCircle size={20} />
-          </Link>
-
           <Link to="/exchanges" title="Exchanges">
             <ArrowLeftRight size={20} />
+          </Link>
+
+          <Link to="/messaging" title="Messages">
+            <MessageCircle size={20} />
           </Link>
 
           <Link to="/profile" title="Profile">

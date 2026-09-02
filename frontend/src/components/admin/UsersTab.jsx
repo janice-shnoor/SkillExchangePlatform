@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import AdminTable from '../AdminTable'
+import AdminTable from '../Table'
 import ConfirmDialog from '../ConfirmDialog'
 import FormDialog from '../FormDialog'
 

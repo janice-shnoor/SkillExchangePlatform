@@ -126,9 +126,7 @@ export async function getSentRequests(senderId) {
 
 export async function acceptExchangeRequest(requestId, receiverId) {
   const request = await prisma.exchangeRequest.findUnique({
-    where: {
-      id: requestId,
-    },
+    where: { id: requestId },
   })
 
   if (!request) {
@@ -153,14 +151,45 @@ export async function acceptExchangeRequest(requestId, receiverId) {
     throw error
   }
 
-  return prisma.exchangeRequest.update({
-    where: {
-      id: requestId,
-    },
-    data: {
-      status: 'ACCEPTED',
-    },
+  if (
+    !request.senderId ||
+    !request.receiverId ||
+    !request.senderSkillId ||
+    !request.receiverSkillId
+  ) {
+    const error = new Error(
+      'Exchange request is missing required information'
+    )
+    error.statusCode = 400
+    throw error
+  }
+
+  const result = await prisma.$transaction(async (tx) => {
+    const exchange = await tx.exchange.create({
+      data: {
+        requestId: request.id,
+        userAId: request.senderId,
+        userBId: request.receiverId,
+        skillAId: request.senderSkillId,
+        skillBId: request.receiverSkillId,
+        status: 'ACTIVE',
+      },
+    })
+
+    const updatedRequest = await tx.exchangeRequest.update({
+      where: { id: request.id },
+      data: {
+        status: 'ACCEPTED',
+      },
+    })
+
+    return {
+      exchange,
+      request: updatedRequest,
+    }
   })
+
+  return result
 }
 
 export async function rejectExchangeRequest(requestId, receiverId) {

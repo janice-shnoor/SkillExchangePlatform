@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import ExchangeRequestCard from '../components/ExchangeRequestRow'
-import AdminTable from '../components/AdminTable'
+import Table from '../components/Table'
 
 
 const API_URL = import.meta.env.VITE_API_URL
@@ -12,6 +12,22 @@ function Exchanges() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [actionLoading, setActionLoading] = useState('')
+  const [exchanges, setExchanges] = useState([])
+  const [currentUser, setCurrentUser] = useState(null)
+
+  async function fetchCurrentUser() {
+    const response = await fetch(`${API_URL}/profile`, {
+      credentials: 'include',
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to load profile')
+    }
+
+    return data.user
+  }
 
   async function fetchRequests(path) {
     const response = await fetch(`${API_URL}${path}`, {
@@ -32,13 +48,17 @@ function Exchanges() {
       setLoading(true)
       setError('')
 
-      const [sent, received] = await Promise.all([
+      const [sent, received, exchangeData, user] = await Promise.all([
         fetchRequests('/exchange-requests/sent'),
         fetchRequests('/exchange-requests/received'),
+        fetchExchanges(),
+        fetchCurrentUser(),
       ])
 
       setSentRequests(sent)
       setReceivedRequests(received)
+      setExchanges(exchangeData)
+      setCurrentUser(user)
     } catch (error) {
       setError(error.message)
     } finally {
@@ -49,6 +69,20 @@ function Exchanges() {
   useEffect(() => {
     loadRequests()
   }, [])
+
+  async function fetchExchanges() {
+    const response = await fetch(`${API_URL}/exchange`, {
+      credentials: 'include',
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to load exchanges')
+    }
+
+    return data.exchanges
+  }
 
   async function handleAction(requestId, action) {
     try {
@@ -165,6 +199,81 @@ function Exchanges() {
     },
   ]
 
+  const exchangeColumns = [
+    {
+      key: 'user',
+      label: 'User',
+      render: (exchange) => {
+        const otherUser =
+          exchange.userAId === currentUser?.id
+            ? exchange.userB
+            : exchange.userA
+
+        return `@${otherUser.username}`
+      },
+    },
+    {
+      key: 'skillA',
+      label: 'Skill A',
+      render: (exchange) => {
+        const isUserA = exchange.userAId === currentUser?.id
+
+        return isUserA
+          ? exchange.skillA.name
+          : exchange.skillB.name
+      },
+    },
+    {
+      key: 'skillB',
+      label: 'Skill B',
+      render: (exchange) => {
+        const isUserA = exchange.userAId === currentUser?.id
+
+        return isUserA
+          ? exchange.skillB.name
+          : exchange.skillA.name
+      },
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      render: (exchange) => {
+        const statusStyles = {
+          ACTIVE:
+            'bg-[var(--primary)]/10 text-[var(--primary)] border-[var(--primary)]/20',
+          COMPLETED:
+            'bg-[var(--success)]/10 text-[var(--success)] border-[var(--success)]/20',
+          CANCELLED:
+            'bg-[var(--warning)]/10 text-[var(--warning)] border-[var(--warning)]/20',
+        }
+
+        return (
+          <span
+            className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide ${
+              statusStyles[exchange.status]
+            }`}
+          >
+            {exchange.status}
+          </span>
+        )
+      },
+    },
+    {
+      key: 'createdAt',
+      label: 'Created At',
+      render: (exchange) =>
+        new Date(exchange.createdAt).toLocaleDateString(),
+    },
+    {
+      key: 'completedAt',
+      label: 'Closed At',
+      render: (exchange) =>
+        exchange.completedAt
+          ? new Date(exchange.completedAt).toLocaleDateString()
+          : '—',
+    },
+  ]
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -180,18 +289,22 @@ function Exchanges() {
 
       {/* Tabs */}
       <div className="flex gap-8 border-b border-[var(--border)]">
-        {['current', 'archived'].map((tab) => (
+        {[
+            { key: 'current', label: 'Current Requests' },
+            { key: 'archived', label: 'Archived Requests' },
+            { key: 'exchanges', label: 'Exchanges' },
+          ].map((tab)=> (
           <button
-            key={tab}
+            key={tab.key}
             type="button"
-            onClick={() => setActiveTab(tab)}
+            onClick={() => setActiveTab(tab.key)}
             className={`pb-3 text-sm font-medium capitalize ${
-              activeTab === tab
+              activeTab === tab.key
                 ? 'border-b-2 border-[var(--primary)] text-[var(--text)]'
                 : 'text-[var(--text-muted)]'
             }`}
           >
-            {tab}
+            {tab.label}
           </button>
         ))}
       </div>
@@ -282,7 +395,7 @@ function Exchanges() {
         <section>
           {archivedRequests.length > 0 ? (
             <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)]">
-              <AdminTable
+              <Table
                 columns={archivedColumns}
                 data={archivedRequests}
               />
@@ -290,6 +403,24 @@ function Exchanges() {
           ) : (
             <p className="text-sm text-[var(--text-muted)]">
               No archived requests.
+            </p>
+          )}
+        </section>
+      )}
+
+      {/* Exchanges */}
+      {!loading && !error && activeTab === 'exchanges' && (
+        <section>
+          {exchanges.length > 0 ? (
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)]">
+              <Table
+                columns={exchangeColumns}
+                data={exchanges}
+              />
+            </div>
+          ) : (
+            <p className="text-sm text-[var(--text-muted)]">
+              No exchanges yet.
             </p>
           )}
         </section>
