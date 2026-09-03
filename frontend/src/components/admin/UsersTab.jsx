@@ -125,22 +125,13 @@ function UsersTab() {
 
   return (
     <>
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold text-[var(--text)]">
-          User Management
-        </h2>
-
-        <p className="mt-1 text-sm text-[var(--text-muted)]">
-          View and manage registered users.
-        </p>
-      </div>
-
       {error && (
         <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-[var(--error)]">
           {error}
         </p>
       )}
-
+    <div className='pt-3'></div>
+    <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)]">
       {users.length === 0 ? (
         <p className="text-sm text-[var(--text-muted)]">
           No users found.
@@ -155,8 +146,8 @@ function UsersTab() {
                 type="button"
                 onClick={() => setEditingUser(user)}
                 disabled={actionLoading}
-                className="font-medium text-[var(--primary-hover)] disabled:opacity-50"
-              >
+                className="font-medium text-[var(--primary-hover)] transition hover:underline disabled:opacity-50"
+                >
                 Edit
               </button>
 
@@ -164,7 +155,7 @@ function UsersTab() {
                 type="button"
                 onClick={() => setDeletingUser(user)}
                 disabled={actionLoading}
-                className="font-medium text-[var(--error)] disabled:opacity-50"
+                className="font-medium text-[var(--error)] transition hover:underline disabled:opacity-50"
               >
                 Delete
               </button>
@@ -172,6 +163,7 @@ function UsersTab() {
           )}
         />
       )}
+      </div>
 
       {editingUser && (
         <FormDialog

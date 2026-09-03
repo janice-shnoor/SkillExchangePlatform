@@ -8,6 +8,12 @@ function userSelect() {
     email: true,
     role: true,
     updatedAt: true,
+
+    reviewsReceived: {
+      select: {
+        rating: true,
+      },
+    },
   }
 }
 
@@ -21,7 +27,22 @@ export async function getProfile(userId) {
     throw new Error('User not found')
   }
 
-  return user
+  const ratings = user.reviewsReceived.map(
+    (review) => review.rating
+  )
+
+  const averageRating =
+    ratings.length > 0
+      ? ratings.reduce((sum, rating) => sum + rating, 0) /
+        ratings.length
+      : null
+
+  return {
+    ...user,
+    averageRating,
+    totalRatings: ratings.length,
+    reviewsReceived: undefined,
+  }
 }
 
 export async function updateProfile(userId, data) {

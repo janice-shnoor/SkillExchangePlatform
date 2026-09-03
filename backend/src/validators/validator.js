@@ -26,3 +26,13 @@ export const addUserSkillSchema = z.object({
   params: z.object({}),
   query: z.object({}),
 })
+
+export const createReviewSchema = z.object({
+  body: z.object({
+    rating: z
+      .number()
+      .int()
+      .min(1, 'Rating must be at least 1')
+      .max(5, 'Rating cannot exceed 5'),
+  }),
+})

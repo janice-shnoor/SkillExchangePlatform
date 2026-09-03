@@ -96,7 +96,11 @@ function SkillCard({ user }) {
         </div>
 
         <p className="shrink-0 text-[11px] text-[var(--text-muted)]">
-          ★ No Ratings Yet
+          ★{' '}
+          {user.averageRating !== null &&
+          user.averageRating !== undefined
+            ? `${user.averageRating.toFixed(1)} (${user.totalRatings})`
+            : 'No Ratings Yet'}
         </p>
       </div>
 

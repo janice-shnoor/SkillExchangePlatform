@@ -158,80 +158,54 @@ function Dashboard() {
     <div className="w-full space-y-8">
       {/* Header */}
       <div>
+        <p className="mt-2 text-[var(--text-muted)]">
+          Welcome back,
+        </p>
         <h1 className="text-3xl font-bold text-[var(--text)]">
-          Dashboard
+          {user.name}
         </h1>
 
-        <p className="mt-2 text-[var(--text-muted)]">
-          Welcome back, {user.name}.
-        </p>
+
       </div>
 
-      {/* Profile */}
-      <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
-        <div className="p-6 sm:p-8">
-          <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--primary-subtle)] text-xl font-semibold text-[var(--primary-hover)]">
-              {user.name.charAt(0).toUpperCase()}
-            </div>
-
-            <div>
-              <h2 className="text-xl font-semibold text-[var(--text)]">
-                {user.name}
-              </h2>
-
-              <p className="mt-0.5 text-sm text-[var(--text-muted)]">
-                @{user.username}
-              </p>
-            </div>
+      {/* Stats */}
+      <section>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5">
+            <p className="text-xs font-medium uppercase tracking-wide text-[var(--text-muted)]">
+              Skills
+            </p>
+            <p className="mt-2 text-2xl font-bold text-[var(--text)]">
+              {offered.length + wanted.length}
+            </p>
           </div>
 
-          <div className="mt-8 grid gap-6 border-t border-[var(--border)] pt-8 sm:grid-cols-3">
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-[var(--text-muted)]">
-                Email
-              </p>
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5">
+            <p className="text-xs font-medium uppercase tracking-wide text-[var(--text-muted)]">
+              Requests
+            </p>
+            <p className="mt-2 text-2xl font-bold text-[var(--text)]">
+              {sentRequests.length + receivedRequests.length}
+            </p>
+          </div>
 
-              <p className="mt-1.5 text-sm text-[var(--text)]">
-                {user.email}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-[var(--text-muted)]">
-                Role
-              </p>
-
-              <span className="mt-1.5 inline-flex rounded-full bg-[var(--primary-subtle)] px-2.5 py-1 text-xs font-medium text-[var(--primary-hover)]">
-                {user.role}
-              </span>
-            </div>
-
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-[var(--text-muted)]">
-                Skills
-              </p>
-
-              <p className="mt-1.5 text-sm text-[var(--text)]">
-                {offered.length + wanted.length}
-              </p>
-            </div>
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5">
+            <p className="text-xs font-medium uppercase tracking-wide text-[var(--text-muted)]">
+              Exchanges
+            </p>
+            <p className="mt-2 text-2xl font-bold text-[var(--text)]">
+              {exchanges.length}
+            </p>
           </div>
         </div>
       </section>
 
       {/* Dashboard Overview */}
-      <div className="grid gap-6 lg:grid-cols-[3fr_2fr]">
-        {/* Recent Requests */}
-        <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
-          <div className="p-6 pb-4 sm:p-8 sm:pb-5">
+      <div className="grid w-full min-w-0 gap-6 lg:grid-cols-[3fr_2fr]">        {/* Recent Requests */}
+        <section className="min-w-0 rounded-2xl border border-[var(--border)] bg-[var(--surface)]">          <div className="p-6 pb-4 sm:p-8 sm:pb-5">
             <h2 className="text-lg font-semibold text-[var(--text)]">
               Recent Requests
             </h2>
-
-            <p className="mt-1 text-sm text-[var(--text-muted)]">
-              Your latest exchange activity.
-            </p>
           </div>
 
           {/* Sent */}
@@ -285,19 +259,14 @@ function Dashboard() {
         </section>
 
         {/* Recent Exchanges */}
-        <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8">
+        <section className="min-w-0 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8">          
           <div>
             <h2 className="text-lg font-semibold text-[var(--text)]">
               Exchanges
             </h2>
-
-            <p className="mt-1 text-sm text-[var(--text-muted)]">
-              Your most recent skill exchanges.
-            </p>
           </div>
 
-          <div className="mt-7 overflow-hidden rounded-xl border border-[var(--border)]">
-            {recentExchanges.length > 0 ? (
+          <div className="mt-6 w-full min-w-0 overflow-x-auto rounded-xl border border-[var(--border)]">            {recentExchanges.length > 0 ? (
               <Table
                 columns={recentExchangeColumns}
                 data={recentExchanges}

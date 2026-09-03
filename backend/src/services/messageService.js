@@ -12,7 +12,13 @@ export async function getMessages(exchangeId, userId) {
     error.statusCode = 404
     throw error
   }
-
+  if (exchange.status !== 'ACTIVE') {
+    const error = new Error(
+      'Messaging is only available for active exchanges'
+    )
+    error.statusCode = 400
+    throw error
+  }
   const isParticipant =
     exchange.userAId === userId ||
     exchange.userBId === userId
@@ -56,7 +62,13 @@ export async function sendMessage(exchangeId, userId, content) {
     error.statusCode = 404
     throw error
   }
-
+  if (exchange.status !== 'ACTIVE') {
+    const error = new Error(
+      'Messaging is only available for active exchanges'
+    )
+    error.statusCode = 400
+    throw error
+  }
   const isParticipant =
     exchange.userAId === userId ||
     exchange.userBId === userId

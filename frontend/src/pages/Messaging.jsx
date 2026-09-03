@@ -1,6 +1,17 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
+import { NavLink, useNavigate, useParams } from 'react-router-dom'
+import {
+  LayoutDashboard,
+  Search,
+  MessageCircle,
+  ArrowLeftRight,
+  User,
+  MessageSquare,
+  Menu,
+  X,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -16,6 +27,17 @@ function Messaging() {
   const [loading, setLoading] = useState(true)
   const [loadingMessages, setLoadingMessages] = useState(false)
   const [error, setError] = useState('')
+
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [mobileExchangeOpen, setMobileExchangeOpen] = useState(false)
+
+  const navigation = [
+    { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { to: '/discover', label: 'Discover', icon: Search },
+    { to: '/messaging', label: 'Messages', icon: MessageCircle },
+    { to: '/exchanges', label: 'Exchanges', icon: ArrowLeftRight },
+    { to: '/profile', label: 'Profile', icon: User },
+  ]
 
   async function fetchData(path, options = {}) {
     const response = await fetch(`${API_URL}${path}`, {
@@ -46,15 +68,22 @@ function Messaging() {
   useEffect(() => {
     async function load() {
       try {
+        setLoading(true)
+        setError('')
+
         const [profile, exchangeData] = await Promise.all([
           fetchData('/profile'),
           fetchData('/exchange'),
         ])
-
         setCurrentUser(profile.user)
-        setExchanges(exchangeData.exchanges)
 
-        const selected = exchangeData.exchanges.find(
+        const activeExchanges = exchangeData.exchanges.filter(
+          (exchange) => exchange.status === 'ACTIVE'
+        )
+
+        setExchanges(activeExchanges)
+
+        const selected = activeExchanges.find(
           (exchange) => exchange.id === id
         )
 
@@ -75,9 +104,12 @@ function Messaging() {
     async function loadMessages() {
       try {
         setLoadingMessages(true)
+        setError('')
+
         const data = await fetchData(
           `/message/${selectedExchange.id}/messages`
         )
+
         setMessages(data.messages)
       } catch (error) {
         setError(error.message)
@@ -113,111 +145,270 @@ function Messaging() {
     }
   }
 
+  function selectExchange(exchange) {
+    setSelectedExchange(exchange)
+    setMessages([])
+    setError('')
+    setMobileExchangeOpen(false)
+  }
+
   if (loading) {
     return (
-      <p className="text-sm text-[var(--text-muted)]">
+      <div className="flex min-h-screen items-center justify-center text-sm text-[var(--text-muted)]">
         Loading messages...
-      </p>
+      </div>
     )
   }
 
   return (
-    <div className="w-full">
-      <nav className="bg-[var(--dark)] px-6 py-4">
-        <div className="mx-auto flex w-full items-center">
-          <button
-            type="button"
-            onClick={() => navigate('/dashboard')}
-            className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--text-on-dark)] transition hover:text-[var(--primary)]"
-          >
-            <ArrowLeft size={20} strokeWidth={3.5} />
-          </button>
-          <span
-            className="ml-auto text-xl font-bold"
-            style={{ color: 'var(--primary)' }}
-          >
-            SkillExchange
-          </span>
-        </div>
-      </nav>
-      {error && (
-        <p className="text-sm text-[var(--error)]">
-          {error}
-        </p>
-      )}
+    <div className="relative flex h-screen w-full overflow-hidden bg-[var(--background)]">
 
-      <div className="grid min-h-[600px] overflow-hidden border border-[var(--border)] bg-[var(--surface)] md:grid-cols-[280px_1fr]">
-
-        {/* Exchanges */}
-        <aside className="bg-[var(--primary-subtle)] md:border-r border-[var(--border)]">
-          {exchanges.map((exchange) => {
-            const { user, skills } = getExchangeInfo(exchange)
-            const selected = selectedExchange?.id === exchange.id
+      {/* Desktop Navigation */}
+      <aside className="hidden w-14 shrink-0 flex-col items-center bg-[var(--dark)] py-4 md:flex">
+        <nav className="flex flex-1 flex-col items-center gap-2">
+          {navigation.map((item) => {
+            const Icon = item.icon
 
             return (
-              <button
-                key={exchange.id}
-                type="button"
-                onClick={() => setSelectedExchange(exchange)}
-                className={`w-full px-5 py-4 text-left transition ${
-                  selected
-                    ? 'bg-[var(--primary)]'
-                    : 'hover:bg-[var(--primary-hover)]'
-                }`}
+              <NavLink
+                key={item.to}
+                to={item.to}
+                aria-label={item.label}
+                className={({ isActive }) =>
+                  `flex h-9 w-9 items-center justify-center rounded-lg transition ${
+                    isActive
+                      ? 'bg-[var(--primary)]/10 text-[var(--primary)]'
+                      : 'text-[var(--text-on-dark)] hover:bg-[var(--primary)]/10 hover:text-[var(--primary)]'
+                  }`
+                }
               >
-                <p
-                  className={`text-sm font-medium ${
-                    selected
-                      ? 'text-white'
-                      : 'text-[var(--text)]'
-                  }`}
-                >
-                  {user.name}
-                </p>
-
-                <p
-                  className={`mt-1 text-xs ${
-                    selected
-                      ? 'text-white/70'
-                      : 'text-[var(--text-muted)]'
-                  }`}
-                >
-                  {skills}
-                </p>
-              </button>
+                <Icon size={18} />
+              </NavLink>
             )
           })}
-        </aside>
+        </nav>
+      </aside>
 
-        {/* Conversation */}
-        <section className="flex min-w-0 flex-col bg-[var(--background)]">
-          {!selectedExchange ? (
-            <div className="flex flex-1 items-center justify-center text-sm text-[var(--text-muted)]">
-              Select an exchange to start messaging.
+      {/* Mobile Navigation Drawer */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <button
+            type="button"
+            aria-label="Close navigation"
+            onClick={() => setMobileMenuOpen(false)}
+            className="absolute inset-0 bg-black/20"
+          />
+
+          <aside className="relative flex h-full w-56 flex-col bg-[var(--dark)]">
+            <div className="flex justify-end px-4 py-4">
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--text-on-dark)] transition hover:bg-[var(--primary)]/10 hover:text-[var(--primary)]"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <nav className="space-y-1 px-3 py-2">
+              {navigation.map((item) => {
+                const Icon = item.icon
+
+                return (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition ${
+                        isActive
+                          ? 'bg-[var(--primary)]/10 text-[var(--primary)]'
+                          : 'text-[var(--text-on-dark)] hover:bg-[var(--primary)]/10 hover:text-[var(--primary)]'
+                      }`
+                    }
+                  >
+                    <Icon size={18} />
+                    {item.label}
+                  </NavLink>
+                )
+              })}
+            </nav>
+          </aside>
+        </div>
+      )}
+
+      {/* Desktop Exchange List */}
+      <aside className="hidden w-64 shrink-0 flex-col border-r border-[var(--border)] bg-[var(--surface)] md:flex">
+        <div className="flex h-14 shrink-0 items-center border-b border-[var(--border)] px-4">
+          <h1 className="text-sm font-semibold text-[var(--text)]">
+            Messages
+          </h1>
+        </div>
+
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          {exchanges.length === 0 ? (
+            <div className="px-4 py-6 text-sm text-[var(--text-muted)]">
+              No active exchanges.
             </div>
           ) : (
-            <>
-              <header className="border-b border-[var(--border)] bg-[var(--surface)] px-6 py-4">
-                <p className="text-sm font-semibold text-[var(--text)]">
+            exchanges.map((exchange) => {
+              const { user, skills } = getExchangeInfo(exchange)
+              const selected = selectedExchange?.id === exchange.id
+
+              return (
+                <button
+                  key={exchange.id}
+                  type="button"
+                  onClick={() => selectExchange(exchange)}
+                  className={`w-full border-b border-[var(--border)] px-4 py-3 text-left transition ${
+                    selected
+                      ? 'bg-[var(--primary-subtle)]'
+                      : 'hover:bg-[var(--background)]'
+                  }`}
+                >
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div
+                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${
+                        selected
+                          ? 'bg-[var(--primary)]/10 text-[var(--primary-hover)]'
+                          : 'bg-[var(--primary-subtle)] text-[var(--primary-hover)]'
+                      }`}
+                    >
+                      {user.name.charAt(0).toUpperCase()}
+                    </div>
+
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-[var(--text)]">
+                        {user.name}
+                      </p>
+
+                      <p className="mt-0.5 truncate text-xs text-[var(--text-muted)]">
+                        {skills}
+                      </p>
+                    </div>
+                  </div>
+                </button>
+              )
+            })
+          )}
+        </div>
+      </aside>
+
+      {/* Mobile Header */}
+      <div className="absolute left-0 right-0 top-0 z-30 flex h-14 items-center justify-between bg-[var(--dark)] px-4 md:hidden">
+        <button
+          type="button"
+          onClick={() => setMobileMenuOpen(true)}
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text-on-dark)] transition hover:bg-[var(--primary)]/10 hover:text-[var(--primary)]"
+        >
+          <Menu size={19} />
+        </button>
+
+        <h1 className="text-sm font-semibold text-[var(--text-on-dark)]">
+          Messages
+        </h1>
+
+        <button
+          type="button"
+          onClick={() =>
+            setMobileExchangeOpen((current) => !current)
+          }
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text-on-dark)] transition hover:bg-[var(--primary)]/10 hover:text-[var(--primary)]"
+        >
+          {mobileExchangeOpen ? (
+            <ChevronUp size={19} />
+          ) : (
+            <ChevronDown size={19} />
+          )}
+        </button>
+      </div>
+
+      {/* Mobile Exchange Dropdown */}
+      {mobileExchangeOpen && (
+        <div className="absolute left-0 right-0 top-14 z-20 max-h-[60vh] overflow-y-auto border-b border-[var(--border)] bg-[var(--surface)] md:hidden">
+          {exchanges.length === 0 ? (
+            <div className="px-4 py-5 text-sm text-[var(--text-muted)]">
+              No active exchanges.
+            </div>
+          ) : (
+            exchanges.map((exchange) => {
+              const { user, skills } = getExchangeInfo(exchange)
+              const selected = selectedExchange?.id === exchange.id
+
+              return (
+                <button
+                  key={exchange.id}
+                  type="button"
+                  onClick={() => selectExchange(exchange)}
+                  className={`w-full border-b border-[var(--border)] px-4 py-3.5 text-left last:border-b-0 ${
+                    selected
+                      ? 'bg-[var(--primary-subtle)]'
+                      : 'hover:bg-[var(--background)]'
+                  }`}
+                >
+                  <p className="truncate text-sm font-medium text-[var(--text)]">
+                    {user.name}
+                  </p>
+
+                  <p className="mt-0.5 truncate text-xs text-[var(--text-muted)]">
+                    {skills}
+                  </p>
+                </button>
+              )
+            })
+          )}
+        </div>
+      )}
+
+      {/* One Conversation */}
+      <main className="min-w-0 flex-1 flex flex-col pt-14 md:pt-0">
+
+        {!selectedExchange ? (
+          <div className="flex flex-1 items-center justify-center">
+            <div className="text-center">
+              <MessageSquare
+                size={28}
+                className="mx-auto text-[var(--text-muted)]"
+                strokeWidth={1.5}
+              />
+
+              <p className="mt-3 text-sm text-[var(--text-muted)]">
+                Select an exchange to start messaging.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <>
+            <header className="flex h-14 shrink-0 items-center border-b border-[var(--border)] bg-[var(--surface)] px-4 md:px-5">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-[var(--text)]">
                   {getExchangeInfo(selectedExchange).user.name}
                 </p>
 
-                <p className="mt-1 text-xs text-[var(--text-muted)]">
+                <p className="truncate text-xs text-[var(--text-muted)]">
                   {getExchangeInfo(selectedExchange).skills}
                 </p>
-              </header>
+              </div>
+            </header>
 
-              <div className="flex-1 space-y-4 overflow-y-auto p-6">
-                {loadingMessages ? (
-                  <p className="text-sm text-[var(--text-muted)]">
-                    Loading messages...
-                  </p>
-                ) : messages.length === 0 ? (
-                  <div className="flex h-full items-center justify-center text-sm text-[var(--text-muted)]">
-                    No messages yet.
-                  </div>
-                ) : (
-                  messages.map((message) => {
+            {error && (
+              <p className="border-b border-[var(--border)] bg-red-50 px-5 py-2 text-sm text-[var(--error)]">
+                {error}
+              </p>
+            )}
+
+            <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 md:px-5 md:py-6">
+              {loadingMessages ? (
+                <div className="flex h-full items-center justify-center text-sm text-[var(--text-muted)]">
+                  Loading messages...
+                </div>
+              ) : messages.length === 0 ? (
+                <div className="flex h-full items-center justify-center text-sm text-[var(--text-muted)]">
+                  No messages yet.
+                </div>
+              ) : (
+                <div className="mx-auto flex w-full max-w-4xl flex-col gap-3">
+                  {messages.map((message) => {
                     const isMine =
                       message.senderId === currentUser?.id
 
@@ -231,9 +422,9 @@ function Messaging() {
                         }`}
                       >
                         <div
-                          className={`max-w-[70%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
+                          className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed md:max-w-[75%] ${
                             isMine
-                              ? 'border border-[var(--border)] bg-[var(--primary-subtle)] text-[var(--text)]'
+                              ? 'bg-[var(--primary-subtle)] text-[var(--text)]'
                               : 'border border-[var(--border)] bg-[var(--surface)] text-[var(--text)]'
                           }`}
                         >
@@ -241,41 +432,41 @@ function Messaging() {
                         </div>
                       </div>
                     )
-                  })
-                )}
-              </div>
-
-              <div className="p-4">
-                <div className="flex gap-3">
-                  <input
-                    value={messageInput}
-                    onChange={(e) =>
-                      setMessageInput(e.target.value)
-                    }
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault()
-                        handleSendMessage()
-                      }
-                    }}
-                    placeholder="Write a message..."
-                    className="min-w-0 flex-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-sm text-[var(--text)] outline-none focus:border-[var(--primary)]"
-                  />
-
-                  <button
-                    type="button"
-                    onClick={handleSendMessage}
-                    disabled={!messageInput.trim()}
-                    className="rounded-lg bg-[var(--primary)] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[var(--primary-hover)] disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    Send
-                  </button>
+                  })}
                 </div>
+              )}
+            </div>
+
+            {/* Cleaner Composer */}
+            <div className="shrink-0 bg-[var(--background)] px-3 py-3 md:px-5 md:py-4">
+              <div className="mx-auto flex w-full max-w-4xl items-end gap-2 md:gap-3">
+                <textarea
+                  value={messageInput}
+                  onChange={(e) => setMessageInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault()
+                      handleSendMessage()
+                    }
+                  }}
+                  rows={1}
+                  placeholder="Write a message..."
+                  className="min-h-10 flex-1 resize-none rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3.5 py-2.5 text-sm text-[var(--text)] outline-none transition focus:border-[var(--primary)]"
+                />
+
+                <button
+                  type="button"
+                  onClick={handleSendMessage}
+                  disabled={!messageInput.trim()}
+                  className="shrink-0 rounded-lg px-3.5 py-2.5 text-sm font-medium text-[var(--primary-hover)] transition hover:bg-[var(--primary-subtle)] disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Send
+                </button>
               </div>
-            </>
-          )}
-        </section>
-      </div>
+            </div>
+          </>
+        )}
+      </main>
     </div>
   )
 }

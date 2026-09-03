@@ -62,13 +62,12 @@ function Register() {
             Join SkillExchange and start exchanging skills
           </p>*/}
         </div>
-        
+
         <form
           onSubmit={handleSubmit}
           noValidate
           className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm"
         >
-          
 
           <div className="space-y-5">
 
@@ -87,7 +86,7 @@ function Register() {
                 placeholder="Your name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-lg border border-[var(--border)] px-3 py-2.5 outline-none"
+                className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[var(--text)] outline-none transition placeholder:text-[var(--text-muted)] focus:border-[var(--primary)]"
               />
             </div>
 
@@ -106,7 +105,7 @@ function Register() {
                 placeholder="Your username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full rounded-lg border border-[var(--border)] px-3 py-2.5 outline-none"
+                className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[var(--text)] outline-none transition placeholder:text-[var(--text-muted)] focus:border-[var(--primary)]"
               />
             </div>
 
@@ -125,7 +124,7 @@ function Register() {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-lg border border-[var(--border)] px-3 py-2.5 outline-none"
+                className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[var(--text)] outline-none transition placeholder:text-[var(--text-muted)] focus:border-[var(--primary)]"
               />
             </div>
 
@@ -144,7 +143,7 @@ function Register() {
                 placeholder="Create a password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-lg border border-[var(--border)] px-3 py-2.5 outline-none"
+                className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[var(--text)] outline-none transition placeholder:text-[var(--text-muted)] focus:border-[var(--primary)]"
               />
             </div>
 
@@ -162,31 +161,35 @@ function Register() {
                 placeholder="Confirm your password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full rounded-lg border border-[var(--border)] px-3 py-2.5 outline-none"
+                className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[var(--text)] outline-none transition placeholder:text-[var(--text-muted)] focus:border-[var(--primary)]"
               />
 
             </div>
-          {error && (
-            <p className="mb-5 text-right text-sm text-[var(--error)]">
-              {error}*
-            </p>
-          )}
+
+            {error && (
+              <p className="mb-5 text-right text-sm text-[var(--error)]">
+                {error}*
+              </p>
+            )}
+
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-lg bg-[var(--primary)] px-4 py-2.5 font-medium text-[var(--dark)] disabled:opacity-50"
+              className="w-full rounded-lg bg-[var(--primary)] px-4 py-2.5 font-medium text-[var(--dark)] transition hover:bg-[var(--primary-hover)] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading ? 'Creating account...' : 'Create account'}
             </button>
+
             {success && (
-              <div className="mb-5 rounded-lg bg-green-50 px-4 py-3 text-center text-sm">                <p className="text-green-700">
+              <div className="mb-5 rounded-lg bg-green-50 px-4 py-3 text-center text-sm">
+                <p className="text-green-700">
                   {success}
                 </p>
 
                 <button
                   type="button"
                   onClick={() => navigate('/login')}
-                  className="mt-2 font-medium text-[var(--primary-hover)]"
+                  className="mt-2 font-medium text-[var(--primary-hover)] transition hover:text-[var(--primary)]"
                 >
                   Go to Login
                 </button>
@@ -201,7 +204,7 @@ function Register() {
               <p className="mt-6 text-center text-sm text-[var(--text-muted)]">
                 <Link
                   to="/login"
-                  className="font-medium text-[var(--primary-hover)]"
+                  className="font-medium text-[var(--primary-hover)] transition hover:text-[var(--primary)]"
                 >
                   Login?
                 </Link>

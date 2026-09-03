@@ -5,6 +5,7 @@ function ConfirmDialog({
   cancelText = 'Cancel',
   loading = false,
   onConfirm,
+  confirmClassName = 'bg-[var(--error)]',
   onCancel,
 }) {
   return (
@@ -32,8 +33,7 @@ function ConfirmDialog({
             type="button"
             onClick={onConfirm}
             disabled={loading}
-            className="rounded-lg bg-[var(--error)] px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50"
-          >
+            className={`rounded-lg px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50 ${confirmClassName}`}          >
             {loading ? 'Please wait...' : confirmText}
           </button>
         </div>

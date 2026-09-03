@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import ExchangeRequestCard from '../components/ExchangeRequestRow'
 import Table from '../components/Table'
-
+import DropdownMenu from '../components/DropdownMenu'
+import ConfirmDialog from '../components/ConfirmDialog'
+import RatingDialog from '../components/RatingDialog'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -14,6 +16,10 @@ function Exchanges() {
   const [actionLoading, setActionLoading] = useState('')
   const [exchanges, setExchanges] = useState([])
   const [currentUser, setCurrentUser] = useState(null)
+  const [openMenu, setOpenMenu] = useState(null)
+  const menuButtonRef = useRef(null)
+  const [confirmAction, setConfirmAction] = useState(null)
+  const [ratingExchange, setRatingExchange] = useState(null)
 
   async function fetchCurrentUser() {
     const response = await fetch(`${API_URL}/profile`, {
@@ -43,6 +49,20 @@ function Exchanges() {
     return data.requests
   }
 
+  async function fetchExchanges() {
+    const response = await fetch(`${API_URL}/exchange`, {
+      credentials: 'include',
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to load exchanges')
+    }
+
+    return data.exchanges
+  }
+
   async function loadRequests() {
     try {
       setLoading(true)
@@ -70,20 +90,6 @@ function Exchanges() {
     loadRequests()
   }, [])
 
-  async function fetchExchanges() {
-    const response = await fetch(`${API_URL}/exchange`, {
-      credentials: 'include',
-    })
-
-    const data = await response.json()
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to load exchanges')
-    }
-
-    return data.exchanges
-  }
-
   async function handleAction(requestId, action) {
     try {
       setActionLoading(requestId)
@@ -103,6 +109,74 @@ function Exchanges() {
         throw new Error(data.message || `Failed to ${action} request`)
       }
 
+      await loadRequests()
+    } catch (error) {
+      setError(error.message)
+    } finally {
+      setActionLoading('')
+    }
+  }
+
+  async function handleExchangeAction() {
+    if (!confirmAction) return
+
+    try {
+      setActionLoading(confirmAction.exchangeId)
+      setError('')
+
+      const response = await fetch(
+        `${API_URL}/exchange/${confirmAction.exchangeId}/${confirmAction.action}`,
+        {
+          method: 'PATCH',
+          credentials: 'include',
+        }
+      )
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || 'Failed to update exchange'
+        )
+      }
+
+      setConfirmAction(null)
+      await loadRequests()
+    } catch (error) {
+      setError(error.message)
+    } finally {
+      setActionLoading('')
+    }
+  }
+
+  async function handleRatingSubmit(rating) {
+    if (!ratingExchange) return
+
+    try {
+      setActionLoading(ratingExchange.id)
+      setError('')
+
+      const response = await fetch(
+        `${API_URL}/exchange/${ratingExchange.id}/review`,
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ rating }),
+        }
+      )
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || 'Failed to submit rating'
+        )
+      }
+
+      setRatingExchange(null)
       await loadRequests()
     } catch (error) {
       setError(error.message)
@@ -272,33 +346,132 @@ function Exchanges() {
           ? new Date(exchange.completedAt).toLocaleDateString()
           : '—',
     },
+    {
+      key: 'rating',
+      label: 'Rating',
+      render: (exchange) => {
+        if (exchange.status !== 'COMPLETED') {
+          return '—'
+        }
+
+        if (!exchange.reviews?.length) {
+          return 'Not rated'
+        }
+
+        return `${exchange.reviews[0].rating}/5`
+      },
+    },
+    {
+      key: 'actions',
+      label: '',
+      render: (exchange) => {
+        const isRated =
+          exchange.status === 'COMPLETED' &&
+          exchange.reviews?.length > 0
+
+        const isMenuDisabled =
+          exchange.status === 'CANCELLED' || isRated
+
+        return (
+          <div>
+            <button
+              ref={
+                openMenu === exchange.id
+                  ? menuButtonRef
+                  : null
+              }
+              type="button"
+              disabled={isMenuDisabled}
+              onClick={() =>
+                setOpenMenu(
+                  openMenu === exchange.id
+                    ? null
+                    : exchange.id
+                )
+              }
+              className={`rounded-md px-2 py-1 text-lg ${
+                isMenuDisabled
+                  ? 'cursor-not-allowed text-[var(--text-muted)] opacity-40'
+                  : 'text-[var(--text-muted)] hover:bg-[var(--background)] hover:text-[var(--text)]'
+              }`}
+            >
+              ⋮
+            </button>
+
+            {openMenu === exchange.id && (
+              <DropdownMenu
+                anchorRef={menuButtonRef}
+                onClose={() => setOpenMenu(null)}
+              >
+                {exchange.status === 'ACTIVE' && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOpenMenu(null)
+                        setConfirmAction({
+                          exchangeId: exchange.id,
+                          action: 'complete',
+                        })
+                      }}
+                      className="w-full px-3 py-2 text-left text-sm text-[var(--text)] hover:bg-[var(--background)]"
+                    >
+                      Complete exchange
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOpenMenu(null)
+                        setConfirmAction({
+                          exchangeId: exchange.id,
+                          action: 'cancel',
+                        })
+                      }}
+                      className="w-full px-3 py-2 text-left text-sm text-[var(--text)] hover:bg-[var(--background)]"
+                    >
+                      Cancel exchange
+                    </button>
+                  </>
+                )}
+
+                {exchange.status === 'COMPLETED' && !isRated && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOpenMenu(null)
+                      setRatingExchange(exchange)
+                    }}
+                    className="block w-full px-4 py-2 text-left text-sm text-[var(--text)] hover:bg-[var(--background)]"
+                  >
+                    Rate exchange
+                  </button>
+                )}
+              </DropdownMenu>
+            )}
+          </div>
+        )
+      },
+    },
   ]
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-[var(--text)]">
-          Manage Exchanges
-        </h1>
+    <div className="w-full space-y-6">
+      <h1 className="text-3xl font-bold text-[var(--text)]">
+        Manage Exchanges
+      </h1>
 
-        {/*<p className="mt-2 text-[var(--text-muted)]">
-          Manage your exchange requests.
-        </p>*/}
-      </div>
-
-      {/* Tabs */}
-      <div className="flex gap-8 border-b border-[var(--border)]">
+      <div className="flex gap-6 border-b border-[var(--border)]">
         {[
-            { key: 'current', label: 'Current Requests' },
-            { key: 'archived', label: 'Archived Requests' },
-            { key: 'exchanges', label: 'Exchanges' },
-          ].map((tab)=> (
+          { key: 'current', label: 'Current Requests' },
+          { key: 'archived', label: 'Archived Requests' },
+          { key: 'exchanges', label: 'Exchanges' },
+        ].map((tab) => (
           <button
             key={tab.key}
             type="button"
             onClick={() => setActiveTab(tab.key)}
-            className={`pb-3 text-sm font-medium capitalize ${
+            className={`pb-3 text-sm font-medium ${
               activeTab === tab.key
                 ? 'border-b-2 border-[var(--primary)] text-[var(--text)]'
                 : 'text-[var(--text-muted)]'
@@ -309,37 +482,27 @@ function Exchanges() {
         ))}
       </div>
 
-      {/* Loading */}
       {loading && (
         <p className="text-sm text-[var(--text-muted)]">
           Loading requests...
         </p>
       )}
 
-      {/* Error */}
       {!loading && error && (
         <p className="text-sm text-[var(--error)]">
           {error}
         </p>
       )}
 
-      {/* Current */}
       {!loading && !error && activeTab === 'current' && (
-        <div className="space-y-10">
-          
-          {/* Received */}
+        <div className="space-y-6">
           <section>
-            <div className="mb-4">
-              <h2 className="text-lg font-semibold text-[var(--text)]">
-                Received
-              </h2>
-              {/*<p className="mt-1 text-sm text-[var(--text-muted)]">
-                Pending requests waiting for your response.
-              </p>*/}
-            </div>
+            <h2 className="mb-3 text-lg font-semibold text-[var(--text)]">
+              Received
+            </h2>
 
             {pendingReceivedRequests.length > 0 ? (
-              <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)]">
+              <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)]">
                 {pendingReceivedRequests.map((request) => (
                   <ExchangeRequestCard
                     key={request.id}
@@ -358,19 +521,13 @@ function Exchanges() {
             )}
           </section>
 
-          {/* Sent */}
-          <section className="border-t border-[var(--border)] pt-8">
-            <div className="mb-4">
-              <h2 className="text-lg font-semibold text-[var(--text)]">
-                Sent
-              </h2>
-              {/*<p className="mt-1 text-sm text-[var(--text-muted)]">
-                Pending requests you have sent.
-              </p>*/}
-            </div>
+          <section>
+            <h2 className="mb-3 text-lg font-semibold text-[var(--text)]">
+              Sent
+            </h2>
 
             {pendingSentRequests.length > 0 ? (
-              <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)]">
+              <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)]">
                 {pendingSentRequests.map((request) => (
                   <ExchangeRequestCard
                     key={request.id}
@@ -390,11 +547,10 @@ function Exchanges() {
         </div>
       )}
 
-      {/* Archived */}
       {!loading && !error && activeTab === 'archived' && (
         <section>
           {archivedRequests.length > 0 ? (
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)]">
+            <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)]">
               <Table
                 columns={archivedColumns}
                 data={archivedRequests}
@@ -408,11 +564,10 @@ function Exchanges() {
         </section>
       )}
 
-      {/* Exchanges */}
       {!loading && !error && activeTab === 'exchanges' && (
         <section>
           {exchanges.length > 0 ? (
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)]">
+            <div className="overflow-visible rounded-xl border border-[var(--border)] bg-[var(--surface)]">
               <Table
                 columns={exchangeColumns}
                 data={exchanges}
@@ -425,6 +580,56 @@ function Exchanges() {
           )}
         </section>
       )}
+      {confirmAction && (
+      <ConfirmDialog
+        title={
+          confirmAction.action === 'complete'
+            ? 'Complete exchange'
+            : 'Cancel exchange'
+        }
+        message={
+          confirmAction.action === 'complete'
+            ? 'Are you sure you want to complete this exchange?'
+            : 'Are you sure you want to cancel this exchange?'
+        }
+        confirmText={
+          confirmAction.action === 'complete'
+            ? 'Complete'
+            : 'Cancel'
+        }
+        loading={actionLoading === confirmAction.exchangeId}
+        onConfirm={handleExchangeAction}
+        confirmClassName={
+          confirmAction.action === 'complete'
+            ? 'bg-[var(--primary)]'
+            : 'bg-[var(--error)]'
+        }
+        onCancel={() => setConfirmAction(null)}
+      />
+    )}
+    {ratingExchange && (
+    <RatingDialog
+      user={
+        ratingExchange.userAId === currentUser?.id
+          ? ratingExchange.userB
+          : ratingExchange.userA
+      }
+      skillOffered={
+        ratingExchange.userAId === currentUser?.id
+          ? ratingExchange.skillA.name
+          : ratingExchange.skillB.name
+      }
+      skillWanted={
+        ratingExchange.userAId === currentUser?.id
+          ? ratingExchange.skillB.name
+          : ratingExchange.skillA.name
+      }
+      loading={actionLoading === ratingExchange.id}
+      error={error}
+      onSubmit={handleRatingSubmit}
+      onClose={() => setRatingExchange(null)}
+    />
+  )}
     </div>
   )
 }

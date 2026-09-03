@@ -139,65 +139,60 @@ function SkillsTab() {
   }
 
   return (
-    <>
-      <div className="mb-6 flex items-start justify-between">
-        <div>
-          <h2 className="text-xl font-semibold text-[var(--text)]">
-            Skill Management
-          </h2>
+  <>
+    <div className="flex justify-end pb-1 pt-1">
+      <button
+        type="button"
+        onClick={() => setAddingSkill(true)}
+        disabled={actionLoading}
+        className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium text-[var(--primary-hover)] transition hover:bg-[var(--primary-subtle)] disabled:opacity-50"
+      >
+        <Plus size={15} />
+        Add Skill
+      </button>
+    </div>
 
-          <p className="mt-1 text-sm text-[var(--text-muted)]">
-            View and manage platform skills.
-          </p>
-        </div>
-        <button
-            type="button"
-            onClick={() => setAddingSkill(true)}
-            disabled={actionLoading}
-            className="inline-flex items-center px-3 py-2 text-sm font-medium text-[var(--primary-hover)] disabled:opacity-50"
-            >
-            <Plus size={16} />
-            Add
-        </button>
-      </div>
-
-      {error && (
-        <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-[var(--error)]">
+    {error && (
+      <div className="px-6 pb-4">
+        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-[var(--error)]">
           {error}
         </p>
-      )}
+      </div>
+    )}
 
-      {skills.length === 0 ? (
-        <p className="text-sm text-[var(--text-muted)]">
-          No skills found.
-        </p>
-      ) : (
-        <AdminTable
-          columns={skillColumns}
-          data={skills}
-          renderActions={(skill) => (
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => setEditingSkill(skill)}
-                disabled={actionLoading}
-                className="font-medium text-[var(--primary-hover)] disabled:opacity-50"
-              >
-                Edit
-              </button>
+    <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)]">
+    {skills.length === 0 ? (
+      <p className="px-6 py-6 text-sm text-[var(--text-muted)]">
+        No skills found.
+      </p>
+    ) : (
+      <AdminTable
+        columns={skillColumns}
+        data={skills}
+        renderActions={(skill) => (
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => setEditingSkill(skill)}
+              disabled={actionLoading}
+              className="font-medium text-[var(--primary-hover)] transition hover:underline disabled:opacity-50"
+            >
+              Edit
+            </button>
 
-              <button
-                type="button"
-                onClick={() => setDeletingSkill(skill)}
-                disabled={actionLoading}
-                className="font-medium text-[var(--error)] disabled:opacity-50"
-              >
-                Delete
-              </button>
-            </div>
-          )}
-        />
-      )}
+            <button
+              type="button"
+              onClick={() => setDeletingSkill(skill)}
+              disabled={actionLoading}
+              className="font-medium text-[var(--error)] transition hover:underline disabled:opacity-50"
+            >
+              Delete
+            </button>
+          </div>
+        )}
+      />
+    )}
+    </div>
 
       {addingSkill && (
         <FormDialog

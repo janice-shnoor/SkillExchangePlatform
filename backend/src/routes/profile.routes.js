@@ -21,7 +21,7 @@ import { validate } from '../middleware/validate.js'
 import {
   updateProfileSchema,
   addUserSkillSchema,
-} from '../validators/profileValidator.js'
+} from '../validators/validator.js'
 
 const router = Router()
 

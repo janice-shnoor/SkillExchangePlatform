@@ -1,7 +1,10 @@
 import { prisma } from '../lib/prisma.js'
 
-export async function searchUsers(userId, { skill, type, proficiency }) {
-  return prisma.user.findMany({
+export async function searchUsers(
+  userId,
+  { skill, type, proficiency }
+) {
+  const users = await prisma.user.findMany({
     where: {
       id: {
         not: userId,
@@ -27,16 +30,43 @@ export async function searchUsers(userId, { skill, type, proficiency }) {
       id: true,
       name: true,
       username: true,
+
       userSkills: {
         include: {
           skill: true,
         },
       },
+
+      reviewsReceived: {
+        select: {
+          rating: true,
+        },
+      },
     },
+
     orderBy: {
       name: 'asc',
     },
+
     take: 30,
+  })
+
+  return users.map((user) => {
+    const ratings = user.reviewsReceived.map(
+      (review) => review.rating
+    )
+
+    const averageRating =
+      ratings.length > 0
+        ? ratings.reduce((sum, rating) => sum + rating, 0) /
+          ratings.length
+        : null
+
+    return {
+      ...user,
+      averageRating,
+      totalRatings: ratings.length,
+    }
   })
 }
 
@@ -102,15 +132,32 @@ export async function getRecommendations(userId) {
       id: true,
       name: true,
       username: true,
+
       userSkills: {
         include: {
           skill: true,
+        },
+      },
+
+      reviewsReceived: {
+        select: {
+          rating: true,
         },
       },
     },
   })
 
   const recommendations = candidates.map((user) => {
+    const ratings = user.reviewsReceived.map(
+      (review) => review.rating
+    )
+
+    const averageRating =
+      ratings.length > 0
+        ? ratings.reduce((sum, rating) => sum + rating, 0) /
+          ratings.length
+        : null
+
     const theirOffered = user.userSkills.filter(
       (item) => item.type === 'OFFERED'
     )
@@ -135,17 +182,22 @@ export async function getRecommendations(userId) {
       )
     )
 
-    const matchScore = wantedMatches.length*3 + offeredMatches.length
-    const count = wantedMatches.length + offeredMatches.length
+    const matchScore =
+      wantedMatches.length * 3 + offeredMatches.length
+
+    const count =
+      wantedMatches.length + offeredMatches.length
 
     return {
       ...user,
       count,
-      _matchScore:matchScore,
+      averageRating,
+      totalRatings: ratings.length,
+      _matchScore: matchScore,
     }
   })
 
-    return recommendations
+  return recommendations
     .sort((a, b) => b._matchScore - a._matchScore)
     .slice(0, 3)
 }

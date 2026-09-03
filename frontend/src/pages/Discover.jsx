@@ -1,5 +1,11 @@
 import { useEffect, useState } from 'react'
-import {Search,SlidersHorizontal,ChevronDown,ChevronUp,X,} from 'lucide-react'
+import {
+  Search,
+  SlidersHorizontal,
+  ChevronDown,
+  ChevronUp,
+  X,
+} from 'lucide-react'
 
 import SkillCard from '../components/SkillCard'
 
@@ -94,21 +100,9 @@ function Discover() {
   }, [])
 
   return (
-    <div className="space-y-10">
-      {/* Header 
-      <section>
-        <h1 className="text-3xl font-bold text-[var(--accent)]">
-          Discover
-        </h1>
-
-        <p className="mt-2 text-[var(--text-muted)]">
-          Find people to exchange skills with.
-        </p>
-      </section> */}
-
+    <div className="w-full space-y-6">
       {/* Search */}
-      <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-5 py-4 sm:px-6 sm:py-5">
-        {/* Search Input */}
+      <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6">
         <div className="flex overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--background)] transition focus-within:border-[var(--primary)] focus-within:ring-2 focus-within:ring-[var(--primary)]/10">
           <input
             id="skill"
@@ -123,27 +117,28 @@ function Discover() {
             placeholder="Search for a skill..."
             className="min-w-0 flex-1 bg-transparent px-4 py-3 text-sm text-[var(--text)] outline-none placeholder:text-[var(--text-muted)]"
           />
+
           {hasSearched && (
             <button
               type="button"
               onClick={clearSearch}
               aria-label="Clear search"
-              className="inline-flex items-center justify-center px-4 text-[var(--text-muted)] transition hover:text-[var(--text)]"
+              className="inline-flex items-center justify-center px-3 text-[var(--text-muted)] transition hover:text-[var(--text)]"
             >
-              <X size={19} />
+              <X size={18} />
             </button>
           )}
+
           <button
             type="button"
             onClick={handleSearch}
             aria-label="Search"
-            className="inline-flex items-center justify-center px-4 text-[var(--primary)] transition hover:bg-[var(--surface)]"
+            className="inline-flex items-center justify-center px-4 text-[var(--primary-hover)] transition hover:bg-[var(--primary-subtle)]"
           >
             <Search size={19} strokeWidth={2} />
           </button>
         </div>
 
-        {/* Filter Toggle */}
         <div className="mt-3 border-t border-[var(--border)] pt-2.5">
           <button
             type="button"
@@ -151,17 +146,18 @@ function Discover() {
             className="inline-flex items-center gap-1.5 text-[11px] font-medium text-[var(--text-muted)] transition hover:text-[var(--text)]"
           >
             <SlidersHorizontal size={12} />
+
             {showFilters ? (
               <ChevronUp size={11} />
             ) : (
               <ChevronDown size={11} />
             )}
+
+            Filters
           </button>
 
-          {/* Filters */}
           {showFilters && (
-            <div className="mt-3 flex flex-wrap items-center gap-8 border-t border-[var(--border)] pt-3">
-              {/* Type */}
+            <div className="mt-3 flex flex-wrap items-center gap-6 border-t border-[var(--border)] pt-3">
               <div className="flex items-center gap-2">
                 <label
                   htmlFor="type"
@@ -182,7 +178,6 @@ function Discover() {
                 </select>
               </div>
 
-              {/* Proficiency */}
               <div className="flex items-center gap-2">
                 <label
                   htmlFor="proficiency"
@@ -212,13 +207,11 @@ function Discover() {
       {/* Search Results */}
       {hasSearched && (
         <section>
-          <div>
-            <h2 className="text-xl font-semibold text-[var(--text)]">
-              Search Results
-            </h2>
-          </div>
+          <h2 className="text-xl font-semibold text-[var(--text)]">
+            Search Results
+          </h2>
 
-          <div className="mt-6">
+          <div className="mt-4">
             {loading ? (
               <p className="text-sm text-[var(--text-muted)]">
                 Searching...
@@ -232,7 +225,7 @@ function Discover() {
                 No users found matching your search.
               </p>
             ) : (
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
                 {results.map((user) => (
                   <SkillCard key={user.id} user={user} />
                 ))}
@@ -244,32 +237,30 @@ function Discover() {
 
       {/* Recommendations */}
       <section>
-        <div>
-          <h2 className="text-xl font-semibold text-[var(--text)]">
-            Recommendations
-          </h2>
+        <h2 className="text-xl font-semibold text-[var(--text)]">
+          Recommendations
+        </h2>
 
-          <div className="mt-6">
-            {recommendationLoading ? (
-              <p className="text-sm text-[var(--text-muted)]">
-                Loading recommendations...
-              </p>
-            ) : recommendationError ? (
-              <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-[var(--error)]">
-                {recommendationError}
-              </p>
-            ) : recommendations.length === 0 ? (
-              <p className="text-sm text-[var(--text-muted)]">
-                No recommendations available yet.
-              </p>
-            ) : (
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {recommendations.map((user) => (
-                  <SkillCard key={user.id} user={user} />
-                ))}
-              </div>
-            )}
-          </div>
+        <div className="mt-4">
+          {recommendationLoading ? (
+            <p className="text-sm text-[var(--text-muted)]">
+              Loading recommendations...
+            </p>
+          ) : recommendationError ? (
+            <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-[var(--error)]">
+              {recommendationError}
+            </p>
+          ) : recommendations.length === 0 ? (
+            <p className="text-sm text-[var(--text-muted)]">
+              No recommendations available yet.
+            </p>
+          ) : (
+            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+              {recommendations.map((user) => (
+                <SkillCard key={user.id} user={user} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </div>

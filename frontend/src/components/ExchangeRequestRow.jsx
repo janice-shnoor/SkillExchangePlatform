@@ -35,10 +35,10 @@ function ExchangeRequestRow({
 
   return (
     <div
-      className={`grid items-center gap-4 border-b border-[var(--border)] px-4 py-3 last:border-b-0 ${
+      className={`grid items-center gap-2 border-b border-[var(--border)] px-3 py-3 last:border-b-0 ${
         showActions
-          ? 'grid-cols-[120px_1fr_150px]'
-          : 'grid-cols-[120px_1fr_100px]'
+          ? 'grid-cols-[80px_minmax(0,1fr)_auto] sm:grid-cols-[120px_1fr_150px]'
+          : 'grid-cols-[80px_minmax(0,1fr)_auto] sm:grid-cols-[120px_1fr_100px]'
       }`}
     >
       {/* User */}
@@ -53,10 +53,10 @@ function ExchangeRequestRow({
       </div>
 
       {/* Exchange */}
-      <div className="justify-self-center">
-        <div className="flex items-center gap-3">
-          <div>
-            <p className="text-sm font-medium text-[var(--text)]">
+      <div className="min-w-0 justify-self-center">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+          <div className="min-w-0">
+            <p className="truncate text-sm font-medium text-[var(--text)]">
               {request.senderSkillName}
             </p>
 
@@ -65,12 +65,12 @@ function ExchangeRequestRow({
             </p>
           </div>
 
-          <span className="text-sm text-[var(--text-muted)]">
+          <span className="shrink-0 text-sm text-[var(--text-muted)]">
             →
           </span>
 
-          <div>
-            <p className="text-sm font-medium text-[var(--text)]">
+          <div className="min-w-0">
+            <p className="truncate text-sm font-medium text-[var(--text)]">
               {request.receiverSkillName}
             </p>
 
@@ -85,7 +85,7 @@ function ExchangeRequestRow({
       {!showActions && (
         <div className="justify-self-end">
           <span
-            className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide ${
+            className={`inline-flex shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide ${
               statusStyles[request.status]
             }`}
           >

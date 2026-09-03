@@ -24,9 +24,17 @@ function ProfileSkills() {
 
   useEffect(() => {
     Promise.all([
-      fetch(`${API_URL}/profile/skills`, { credentials: 'include' }).then((r) => r.json()),
-      fetch(`${API_URL}/profile/skills/offered`, { credentials: 'include' }).then((r) => r.json()),
-      fetch(`${API_URL}/profile/skills/wanted`, { credentials: 'include' }).then((r) => r.json()),
+      fetch(`${API_URL}/profile/skills`, {
+        credentials: 'include',
+      }).then((r) => r.json()),
+
+      fetch(`${API_URL}/profile/skills/offered`, {
+        credentials: 'include',
+      }).then((r) => r.json()),
+
+      fetch(`${API_URL}/profile/skills/wanted`, {
+        credentials: 'include',
+      }).then((r) => r.json()),
     ])
       .then(([all, offeredData, wantedData]) => {
         if (!all.success || !offeredData.success || !wantedData.success) {
@@ -49,21 +57,26 @@ function ProfileSkills() {
       const res = await fetch(`${API_URL}/profile/skills`, {
         method: 'POST',
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(form),
       })
 
       const data = await res.json()
-      if (!res.ok) throw new Error(data.message || 'Request failed')
-        
+
+      if (!res.ok) {
+        throw new Error(data.message || 'Request failed')
+      }
 
       const list = form.type === 'OFFERED' ? setOffered : setWanted
+
       list((current) => [...current, data.userSkill])
       setAdding(false)
     } catch (err) {
       setError(
         err.message.includes('Unique constraint failed')
-          ? 'Duplicate Entries are not allowed.'
+          ? 'Duplicate entries are not allowed.'
           : err.message
       )
     } finally {
@@ -90,7 +103,8 @@ function ProfileSkills() {
         throw new Error(data.message || 'Unable to remove skill')
       }
 
-      const list = deleting.type === 'OFFERED' ? setOffered : setWanted
+      const list =
+        deleting.type === 'OFFERED' ? setOffered : setWanted
 
       list((current) =>
         current.filter((item) => item.id !== deleting.id)
@@ -144,19 +158,21 @@ function ProfileSkills() {
     },
   ]
 
-  const group = (items, title, description, type) => (
-    <div className="rounded-xl border border-[var(--border)] p-5">
-      <div className="flex items-start justify-between">
-        <div>
-          <h3 className="text-sm font-semibold text-[var(--text)]">{title}</h3>
-          <p className="mt-1 text-sm text-[var(--text-muted)]">{description}</p>
-        </div>
-        <span className="text-xs text-[var(--text-muted)]">{items.length}</span>
+  const group = (items, title) => (
+    <div className="rounded-xl border border-[var(--border)] p-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-[var(--text)]">
+          {title}
+        </h3>
+
+        <span className="text-xs text-[var(--text-muted)]">
+          {items.length}
+        </span>
       </div>
 
-      <div className="mt-5 space-y-2">
+      <div className="mt-4 space-y-2">
         {!loading && !items.length && (
-          <p className="rounded-lg bg-[var(--background)] px-4 py-5 text-center text-sm text-[var(--text-muted)]">
+          <p className="rounded-lg bg-[var(--background)] px-3 py-4 text-center text-sm text-[var(--text-muted)]">
             No skills added yet.
           </p>
         )}
@@ -164,12 +180,13 @@ function ProfileSkills() {
         {items.map((item) => (
           <div
             key={item.id}
-            className="flex items-center justify-between rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-3"
+            className="flex items-center justify-between gap-3 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2.5"
           >
-            <div>
-              <p className="text-sm font-medium text-[var(--text)]">
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium text-[var(--text)]">
                 {item.skill.name}
               </p>
+
               <p className="text-xs text-[var(--text-muted)]">
                 {levels[item.proficiency]}
               </p>
@@ -179,7 +196,7 @@ function ProfileSkills() {
               type="button"
               onClick={() => setDeleting(item)}
               disabled={actionLoading}
-              className="rounded-md p-1.5 text-[var(--text-muted)] hover:bg-red-50 hover:text-[var(--error)]"
+              className="shrink-0 rounded-md p-1.5 text-[var(--text-muted)] transition hover:bg-red-50 hover:text-[var(--error)] disabled:opacity-50"
             >
               <Trash2 size={15} />
             </button>
@@ -191,14 +208,11 @@ function ProfileSkills() {
 
   return (
     <>
-      <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h2 className="text-xl font-semibold text-[var(--text)]">Skills</h2>
-            <p className="mt-1 text-sm text-[var(--text-muted)]">
-              Manage the skills you offer and want to learn.
-            </p>
-          </div>
+      <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6">
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="text-xl font-semibold text-[var(--text)]">
+            Skills
+          </h2>
 
           <button
             type="button"
@@ -207,32 +221,27 @@ function ProfileSkills() {
               setAdding(true)
             }}
             disabled={loading || actionLoading}
-            className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-[var(--primary-hover)] hover:bg-[var(--primary-subtle)] disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium text-[var(--primary-hover)] transition hover:bg-[var(--primary-subtle)] disabled:opacity-50"
           >
-            <Plus size={16} />
+            <Plus size={15} />
             Add
           </button>
         </div>
 
+        {error && (
+          <p className="mt-4 text-sm text-[var(--error)]">
+            {error}
+          </p>
+        )}
+
         {loading ? (
-          <p className="mt-8 text-sm text-[var(--text-muted)]">
+          <p className="mt-5 text-sm text-[var(--text-muted)]">
             Loading skills...
           </p>
         ) : (
-          <div className="mt-8 grid gap-6 sm:grid-cols-2">
-            {group(
-              offered,
-              'Offered Skills',
-              'Skills you can teach to other users.',
-              'OFFERED'
-            )}
-
-            {group(
-              wanted,
-              'Wanted Skills',
-              'Skills you would like to learn.',
-              'WANTED'
-            )}
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            {group(offered, 'Offered Skills')}
+            {group(wanted, 'Wanted Skills')}
           </div>
         )}
       </section>
