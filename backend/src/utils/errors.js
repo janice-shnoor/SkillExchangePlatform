@@ -13,11 +13,27 @@ export class AppError extends Error {
 export function errorHandler(err, req, res, next) {
   console.error(err)
 
-  const statusCode = err.statusCode || 500
+  let statusCode = err.statusCode || 500
+  let message = err.message || 'Internal server error'
+
+  // Prisma unique constraint error
+  if (err.code === 'P2002') {
+    statusCode = 409
+
+    const field = err.meta?.target?.[0]
+
+    if (field === 'username') {
+      message = 'Username is already taken'
+    } else if (field === 'email') {
+      message = 'Email is already registered'
+    } else {
+      message = 'This information is already in use'
+    }
+  }
 
   res.status(statusCode).json({
     success: false,
-    message: err.message || 'Internal server error',
-    ...(err.details ? { details: err.details } : {})
+    message,
+    ...(err.details ? { details: err.details } : {}),
   })
 }

@@ -5,16 +5,7 @@ import { searchUsers,getRecommendations, } from '../controllers/discoverControll
 
 const router = Router()
 
-router.get(
-  '/search',
-  authenticate,
-  searchUsers
-)
-
-router.get(
-  '/recommendations',
-  authenticate,
-  getRecommendations
-)
+router.get('/search',authenticate,searchUsers)
+router.get('/recommendations',authenticate,getRecommendations)
 
 export default router

@@ -12,12 +12,21 @@ const fields = [
   { name: 'email', label: 'Email', type: 'email', required: true },
 ]
 
+const passwordFields = [
+  { name: 'currentPassword', label: 'Current Password', type: 'password', required: true, },
+  { name: 'newPassword', label: 'New Password', type: 'password', required: true, },
+  { name: 'confirmPassword', label: 'Confirm New Password', type: 'password', required: true, },
+]
+
 function Profile() {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
   const [actionLoading, setActionLoading] = useState(false)
   const [error, setError] = useState('')
+  const [changingPassword, setChangingPassword] = useState(false)
+  const [passwordLoading, setPasswordLoading] = useState(false)
+  const [passwordSuccess, setPasswordSuccess] = useState('')
 
   useEffect(() => {
     fetch(`${API_URL}/profile`, {
@@ -33,10 +42,9 @@ function Profile() {
   }, [])
 
   async function updateProfile(form) {
-    try {
-      setActionLoading(true)
-      setError('')
+    setActionLoading(true)
 
+    try {
       const res = await fetch(`${API_URL}/profile`, {
         method: 'PATCH',
         credentials: 'include',
@@ -54,10 +62,46 @@ function Profile() {
 
       setUser(data.user)
       setEditing(false)
-    } catch (err) {
-      setError(err.message)
     } finally {
       setActionLoading(false)
+    }
+  }
+
+  async function changePassword(form) {
+    setPasswordLoading(true)
+    setPasswordSuccess('')
+
+    try {
+      if (form.newPassword !== form.confirmPassword) {
+        throw new Error('New passwords do not match')
+      }
+
+      const res = await fetch(`${API_URL}/auth/change-password`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          currentPassword: form.currentPassword,
+          newPassword: form.newPassword,
+        }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.message)
+      }
+
+      setChangingPassword(false)
+      setPasswordSuccess('Password changed successfully')
+
+      setTimeout(() => {
+        setPasswordSuccess('')
+      }, 7000)
+    } finally {
+      setPasswordLoading(false)
     }
   }
 
@@ -185,16 +229,36 @@ function Profile() {
           </div>
         </div>
 
-        <div className="mt-6 border-t border-[var(--border)] pt-4 text-xs text-[var(--text-muted)]">
-          Last updated{' '}
-          <span className="font-medium text-[var(--text)]">
-            {new Date(user.updatedAt).toLocaleDateString(undefined, {
-              day: '2-digit',
-              month: 'short',
-              year: 'numeric',
-            })}
-          </span>
+        <div className="mt-6 flex items-center justify-between gap-4 border-t border-[var(--border)] pt-4 text-xs text-[var(--text-muted)]">
+          <div>
+            Last updated{' '}
+            <span className="font-medium text-[var(--text)]">
+              {new Date(user.updatedAt).toLocaleDateString(undefined, {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+              })}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              setPasswordSuccess('')
+              setChangingPassword(true)
+            }}
+            className="shrink-0 text-[var(--text-muted)] transition hover:text-[var(--primary)] hover:underline"
+          >
+            Change Password
+          </button>
         </div>
+        {passwordSuccess && (
+          <div className="flex justify-end">
+            <p className="mt-3 text-xs text-[var(--success)]">
+              {passwordSuccess}
+            </p>
+          </div>
+        )}
       </section>
 
       <ProfileSkills />
@@ -215,6 +279,22 @@ function Profile() {
           onClose={() => setEditing(false)}
         />
       )}
+      {changingPassword && (
+      <FormDialog
+        title="Change Password"
+        description="Update your account password."
+        fields={passwordFields}
+        initialValues={{
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: '',
+        }}
+        loading={passwordLoading}
+        submitLabel="Change Password"
+        onSubmit={changePassword}
+        onClose={() => setChangingPassword(false)}
+      />
+    )}
     </div>
   )
 }

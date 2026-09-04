@@ -60,3 +60,20 @@ export async function logout(req, res, next) {
     next(e)
   }
 }
+
+export async function changePassword(req, res, next) {
+  try {
+    await service.changePassword(
+      req.user.sub,
+      req.validated.body.currentPassword,
+      req.validated.body.newPassword
+    )
+
+    res.status(200).json({
+      success: true,
+      message: 'Password changed successfully',
+    })
+  } catch (e) {
+    next(e)
+  }
+}

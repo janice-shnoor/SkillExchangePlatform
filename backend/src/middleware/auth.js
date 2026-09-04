@@ -30,5 +30,5 @@ export function authorize(...roles) {
   return (req, res, next) =>
     roles.includes(req.user?.role)
       ? next()
-      : next(new AppError('Forbidden', 403, 'FORBIDDEN'))
+      : next(new AppError('Forbidden', 403, 'Unauthorized Access!'))
 }

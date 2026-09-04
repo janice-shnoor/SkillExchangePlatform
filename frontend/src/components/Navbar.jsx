@@ -10,12 +10,24 @@ import {
   LogOut,
   Menu,
   X,
+  Sun,
+  Moon,
 } from 'lucide-react'
 
 function Navbar() {
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
   const [user, setUser] = useState(null)
+  const [darkMode, setDarkMode] = useState(localStorage.getItem('theme') === 'dark')
+
+  useEffect(() => {
+    document.documentElement.setAttribute(
+      'data-theme',
+      darkMode ? 'dark' : 'light'
+    )
+
+    localStorage.setItem('theme', darkMode ? 'dark' : 'light')
+  }, [darkMode])
 
   useEffect(() => {
     async function loadUser() {
@@ -121,6 +133,14 @@ function Navbar() {
         <div className="px-3 py-5">
           <button
             type="button"
+            onClick={() => setDarkMode((current) => !current)}
+            className="mb-1 flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium text-[var(--text-on-dark)] transition hover:text-[var(--primary)]"
+          >
+            {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+            {darkMode ? 'Light Mode' : 'Dark Mode'}
+          </button>
+          <button
+            type="button"
             onClick={handleLogout}
             className="flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium text-[var(--text-on-dark)] transition hover:text-[var(--error)]"
           >
@@ -175,8 +195,8 @@ function Navbar() {
 
       {/* Mobile Sidebar */}
       {menuOpen && (
-        <aside className="fixed top-14 bottom-0 left-0 z-40 w-56 bg-[var(--dark)] lg:hidden">
-          <nav className="space-y-1 px-3 py-6">
+      <aside className="fixed top-14 bottom-0 left-0 z-40 flex w-56 flex-col bg-[var(--dark)] lg:hidden">
+        <nav className="flex flex-1 flex-col px-3 py-6">
 
             {navigation.map((item) => {
               const Icon = item.icon
@@ -201,14 +221,25 @@ function Navbar() {
             })}
 
             {/* Mobile Logout */}
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="mt-4 flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium text-[var(--text-on-dark)] transition hover:text-[var(--error)]"
-            >
-              <LogOut size={18} />
-              Logout
-            </button>
+            <div className="mt-auto pt-6">
+              <button
+                type="button"
+                onClick={() => setDarkMode((current) => !current)}
+                className="mb-1 flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium text-[var(--text-on-dark)] transition hover:text-[var(--primary)]"
+              >
+                {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+                {darkMode ? 'Light' : 'Dark'}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium text-[var(--text-on-dark)] transition hover:text-[var(--error)]"
+              >
+                <LogOut size={18} />
+                Logout
+              </button>
+            </div>
 
           </nav>
         </aside>

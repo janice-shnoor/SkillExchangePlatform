@@ -78,7 +78,7 @@ function SkillsTab() {
       setSkills((current) => [...current, data.skill])
       setAddingSkill(false)
     } catch (error) {
-      setError(error.message)
+      throw error
     } finally {
       setActionLoading(false)
     }
@@ -103,7 +103,7 @@ function SkillsTab() {
 
       setEditingSkill(null)
     } catch (error) {
-      setError(error.message)
+      throw error
     } finally {
       setActionLoading(false)
     }

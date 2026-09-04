@@ -2,60 +2,57 @@
 
 :root {
   /* Brand */
-  --primary: #38bdf8;
-  --primary-hover: #0ea5e9;
-  --primary-subtle: #e0f2fe;
+  --primary: #67D3FF;
+  --primary-hover: #38BDF8;
+  --primary-subtle: #E0F2FE;
 
   /* Dark */
-  --dark: #0f172a;
-  --dark-hover: #1e293b;
+  --dark: #0B1628;
+  --dark-hover: #16243A;
 
   /* Background */
-  --background: #f8fafc;
-  --surface: #ffffff;
-  --surface-hover: #e3e6e8;
+  --background: #F4F6F8;
+  --surface: #FFFFFF;
+  --surface-hover: #EDF1F4;
 
   /* Text */
-  --text: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #64748b;
+  --text: #0B1628;
+  --text-secondary: #465365;
+  --text-muted: #6B7787;
 
   /* Text on dark */
-  --text-on-dark: #f8fafc;
-  --text-on-dark-muted: #cbd5e1;
+  --text-on-dark: #F5F9FC;
+  --text-on-dark-muted: #C4D0DC;
 
   /* Borders */
-  --border: #e2e8f0;
+  --border: #DCE2E8;
 
   /* Status */
-  --success: #16a34a;
-  --warning: #d97706;
-  --error: #dc2626;
+  --success: #16A34A;
+  --warning: #D97706;
+  --error: #DC2626;
 }
 
-@theme {
-  --color-primary: var(--primary);
-  --color-primary-hover: var(--primary-hover);
-  --color-primary-subtle: var(--primary-subtle);
+[data-theme="dark"] {
+  /* Brand */
+  --primary-subtle: #2E4057;
 
-  --color-dark: var(--dark);
-  --color-dark-hover: var(--dark-hover);
+  /* Dark */
+  --dark: #0B1628;
+  --dark-hover: #16263D;
 
-  --color-background: var(--background);
-  --color-surface: var(--surface);
-  --color-surface-hover: var(--surface-hover);
+  /* Background */
+  --background: #0F1B2D;
+  --surface: #162337;
+  --surface-hover: #1D2D43;
 
-  --color-text: var(--text);
-  --color-text-secondary: var(--text-secondary);
-  --color-text-muted: var(--text-muted);
-  --color-text-on-dark: var(--text-on-dark);
-  --color-text-on-dark-muted: var(--text-on-dark-muted);
+  /* Text */
+  --text: #F3F7FA;
+  --text-secondary: #C1CCD8;
+  --text-muted: #8D9BAD;
 
-  --color-border: var(--border);
-
-  --color-success: var(--success);
-  --color-warning: var(--warning);
-  --color-error: var(--error);
+  /* Borders */
+  --border: #2A3B51;
 }
 
 * {
@@ -64,6 +61,7 @@
 
 html {
   scroll-behavior: smooth;
+  font-size: 16px;
 }
 
 body {
@@ -76,13 +74,19 @@ body {
 
   font-family:
     Inter,
+    ui-sans-serif,
     system-ui,
     -apple-system,
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
 
+  font-size: 15px;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 button,
@@ -98,5 +102,15 @@ button {
 
 img {
   max-width: 100%;
+  height: auto;
   display: block;
+}
+
+/* Global surface elevation */
+
+.rounded-xl,
+.rounded-2xl {
+  box-shadow:
+    0 1px 2px rgb(15 23 42 / 0.04),
+    0 4px 12px rgb(15 23 42 / 0.03);
 }

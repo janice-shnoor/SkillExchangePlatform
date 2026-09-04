@@ -136,7 +136,7 @@ function SkillCard({ user }) {
         </div>
 
         {/* Wants */}
-        <div className="rounded-lg bg-slate-50 p-3">
+        <div className="rounded-lg bg-[var(--background)]/50 p-3">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
             Wants
           </p>

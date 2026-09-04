@@ -1,13 +1,19 @@
 import { z } from 'zod'
 
+import {
+  nameSchema,
+  usernameSchema,
+  emailSchema,
+  passwordSchema,
+} from './validatorFields.js'
+
 export const registerSchema = z.object({
   body: z.object({
-    name: z.string().trim().min(1).max(80),
-    username: z.string().trim().min(3).max(30).regex(/^[a-zA-Z0-9_]+$/),
-    email: z.string().trim().email().max(160),
-    password: z.string().min(8).max(100),
+    name: nameSchema,
+    username: usernameSchema,
+    email: emailSchema,
+    password: passwordSchema,
   }),
-
   params: z.object({}),
   query: z.object({}),
 })
@@ -16,6 +22,15 @@ export const loginSchema = z.object({
   body: z.object({
     email: z.string().trim().email(),
     password: z.string().min(1),
+  }),
+  params: z.object({}),
+  query: z.object({}),
+})
+
+export const changePasswordSchema = z.object({
+  body: z.object({
+    currentPassword: z.string().min(1, 'Current password is required'),
+    newPassword: passwordSchema,
   }),
   params: z.object({}),
   query: z.object({}),

@@ -52,7 +52,7 @@ export async function login({ email, password }) {
   })
 
   if (!user) {
-    throw new Error('Invalid')
+    throw new Error('Invalid email or Password')
   }
 
   const passwordValid = await bcrypt.compare(
@@ -61,7 +61,7 @@ export async function login({ email, password }) {
   )
 
   if (!passwordValid) {
-    throw new Error('Invalid')
+    throw new Error('Invalid email or Password')
   }
 
   const token = jwt.sign(
@@ -108,4 +108,47 @@ export async function getCurrentUser(userId) {
   }
 
   return user
+}
+
+export async function changePassword(
+  userId,
+  currentPassword,
+  newPassword
+) {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+    select: {
+      passwordHash: true,
+    },
+  })
+
+  if (!user) {
+    const error = new Error('User not found')
+    error.statusCode = 404
+    throw error
+  }
+
+  const passwordValid = await bcrypt.compare(
+    currentPassword,
+    user.passwordHash
+  )
+
+  if (!passwordValid) {
+    const error = new Error('Current password is incorrect')
+    error.statusCode = 400
+    throw error
+  }
+
+  const newPasswordHash = await bcrypt.hash(newPassword, 12)
+
+  await prisma.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      passwordHash: newPasswordHash,
+    },
+  })
 }

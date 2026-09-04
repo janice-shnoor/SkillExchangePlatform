@@ -21,52 +21,17 @@ import { validate } from '../middleware/validate.js'
 import {
   updateProfileSchema,
   addUserSkillSchema,
+  resourceIdSchema,
 } from '../validators/validator.js'
 
 const router = Router()
 
-router.get(
-  '/',
-  authenticate,
-  getProfile
-)
-
-router.patch(
-  '/',
-  authenticate,
-  validate(updateProfileSchema),
-  updateProfile
-)
-
-router.get(
-  '/skills/offered',
-  authenticate,
-  getOfferedSkills
-)
-
-router.get(
-  '/skills/wanted',
-  authenticate,
-  getWantedSkills
-)
-
-router.post(
-  '/skills',
-  authenticate,
-  validate(addUserSkillSchema),
-  addUserSkill
-)
-
-router.delete(
-  '/skills/:id',
-  authenticate,
-  removeUserSkill
-)
-
-router.get(
-  '/skills',
-  authenticate,
-  getSkills
-)
+router.get('/',authenticate,getProfile)
+router.patch('/',authenticate,validate(updateProfileSchema),updateProfile)
+router.get('/skills/offered',authenticate,getOfferedSkills)
+router.get('/skills/wanted',authenticate,getWantedSkills)
+router.post('/skills',authenticate,validate(addUserSkillSchema),addUserSkill)
+router.delete('/skills/:id',authenticate, validate(resourceIdSchema), removeUserSkill)
+router.get('/skills',authenticate,getSkills)
 
 export default router

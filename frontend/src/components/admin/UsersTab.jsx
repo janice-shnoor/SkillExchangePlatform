@@ -88,7 +88,7 @@ function UsersTab() {
 
       setEditingUser(null)
     } catch (error) {
-      setError(error.message)
+      throw error
     } finally {
       setActionLoading(false)
     }

@@ -15,10 +15,11 @@ function FormDialog({
   onClose,
 }) {
   const [form, setForm] = useState(initialValues)
-
+  const [formError, setFormError] = useState('')
+  
   useEffect(() => {
     setForm(initialValues)
-  }, [initialValues])
+  }, [])
 
   function handleChange(e) {
     const { name, value } = e.target
@@ -29,9 +30,39 @@ function FormDialog({
     }))
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
-    onSubmit(form)
+    setFormError('')
+
+    for (const field of fields) {
+      const value = form[field.name] ?? ''
+
+      if (field.required && !value.trim()) {
+        setFormError(`${field.label} is required`)
+        return
+      }
+
+      if (
+        field.type === 'email' &&
+        value &&
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+      ) {
+        setFormError('Please enter a valid email address')
+        return
+      }
+    }
+
+    try {
+      await onSubmit(form)
+    } catch (err) {
+      setFormError(err.message || 'Please check the entered information.')
+    }
+  }
+
+  function handleClose() {
+    setForm(initialValues)
+    setFormError('')
+    onClose()
   }
 
   return (
@@ -47,13 +78,13 @@ function FormDialog({
           </p>
         )}
 
-        {error && (
+        {(formError || error) && (
           <p className="mt-4 rounded-lg bg-red-50 px-3 py-2.5 text-sm text-[var(--error)]">
-            {error}
+            {formError || error}
           </p>
         )}
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        <form onSubmit={handleSubmit} noValidate className="mt-6 space-y-4">
           {fields.map((field) => (
             <div key={field.name}>
               <label
@@ -111,7 +142,7 @@ function FormDialog({
           <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               disabled={loading}
               className="rounded-lg border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--text)] disabled:opacity-50"
             >
