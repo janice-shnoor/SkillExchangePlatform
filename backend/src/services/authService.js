@@ -1,7 +1,10 @@
 import bcrypt from 'bcrypt'
+import crypto from 'crypto'
 import {prisma} from '../lib/prisma.js'
 import jwt from 'jsonwebtoken'
 import { env } from '../config/env.js'
+import { generateResetToken } from '../utils/passwordReset.js'
+import { sendEmail } from '../lib/mailer.js'
 
 export async function register({
   name, username, email, password,
@@ -151,4 +154,134 @@ export async function changePassword(
       passwordHash: newPasswordHash,
     },
   })
+}
+
+export async function forgotPassword(email) {
+  const user = await prisma.user.findUnique({
+    where: { email },
+    select: {
+      id: true,
+      email: true,
+    },
+  })
+
+  // Do not reveal whether an account exists.
+  if (!user) {
+    return
+  }
+
+  const { token, tokenHash } = generateResetToken()
+
+  // Invalidate any previous reset tokens for this user.
+  await prisma.passwordResetToken.deleteMany({
+    where: {
+      userId: user.id,
+    },
+  })
+
+  const expiresAt = new Date(
+    Date.now() + 60 * 60 * 1000
+  )
+
+  const resetToken = await prisma.passwordResetToken.create({
+    data: {
+      userId: user.id,
+      tokenHash,
+      expiresAt,
+    },
+  })
+
+  const resetUrl =
+    `${env.FRONTEND_URL}/reset-password?token=${token}`
+
+  try {
+    await sendEmail({
+      to: user.email,
+      subject: 'Reset your SkillExchange password',
+      text: [
+        'A password reset was requested for your SkillExchange account.',
+        '',
+        `Reset your password: ${resetUrl}`,
+        '',
+        'This link expires in 1 hour.',
+        '',
+        'If you did not request this, contact services',
+      ].join('\n'),
+
+      html: `
+        <p>
+          A password reset was requested for your SkillExchange account.
+        </p>
+
+        <p>
+          <a href="${resetUrl}">Reset your password</a>
+        </p>
+
+        <p>This link expires in 1 hour.</p>
+
+        <p>
+          If you did not request this, contact services.
+        </p>
+      `,
+    })
+  } catch (error) {
+    // The client must not learn whether the account exists
+    // or whether the email provider failed.
+    console.error('Password reset email failed:', error)
+
+    // Remove the token because no reset email was successfully sent.
+    await prisma.passwordResetToken.delete({
+      where: {
+        id: resetToken.id,
+      },
+    })
+  }
+}
+
+export async function resetPassword({ token, newPassword }) {
+  const tokenHash = crypto
+    .createHash('sha256')
+    .update(token)
+    .digest('hex')
+
+  const resetToken = await prisma.passwordResetToken.findUnique({
+    where: {
+      tokenHash,
+    },
+    select: {
+      id: true,
+      userId: true,
+      expiresAt: true,
+      usedAt: true,
+    },
+  })
+
+  if (
+    !resetToken ||
+    resetToken.usedAt ||
+    resetToken.expiresAt <= new Date()
+  ) {
+    const error = new Error('Invalid or expired password reset token')
+    error.statusCode = 400
+    throw error
+  }
+
+  const passwordHash = await bcrypt.hash(newPassword, 12)
+
+  await prisma.$transaction([
+    prisma.user.update({
+      where: {
+        id: resetToken.userId,
+      },
+      data: {
+        passwordHash,
+      },
+    }),
+
+    prisma.passwordResetToken.deleteMany({
+      where: {
+        userId: resetToken.userId,
+      },
+    }),
+  ])
 }

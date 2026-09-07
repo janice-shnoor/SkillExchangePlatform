@@ -9,6 +9,8 @@ import GuestRoute from './GuestRoute'
 
 import Home from '../pages/Home'
 import Login from '../pages/Login'
+import ForgotPassword from '../pages/ForgotPassword'
+import ResetPassword from '../pages/ResetPassword'
 import Register from '../pages/Register'
 import Dashboard from '../pages/Dashboard'
 import Discover from '../pages/Discover'
@@ -23,6 +25,7 @@ const router = createBrowserRouter([
     element: <GuestRoute />,
     children: [
       { path: '/login', element: <Login /> },
+      { path: '/forgot-password', element: <ForgotPassword /> },
     ],
   },
   {
@@ -34,6 +37,7 @@ const router = createBrowserRouter([
         element: <GuestRoute />,
         children: [
           { path: '/register', element: <Register /> },
+          { path: '/reset-password', element: <ResetPassword /> },
         ],
       },
     ],

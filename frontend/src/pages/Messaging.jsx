@@ -12,6 +12,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react'
+import Avatar from '../components/Avatar'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -267,15 +268,11 @@ function Messaging() {
                   }`}
                 >
                   <div className="flex min-w-0 items-center gap-3">
-                    <div
-                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${
-                        selected
-                          ? 'bg-[var(--primary)]/10 text-[var(--primary-hover)]'
-                          : 'bg-[var(--primary-subtle)] text-[var(--primary-hover)]'
-                      }`}
-                    >
-                      {user.name.charAt(0).toUpperCase()}
-                    </div>
+                    <Avatar
+                      name={user.name}
+                      src={user.avatarUrl}
+                      size="sm"
+                    />
 
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium text-[var(--text)]">
@@ -346,13 +343,23 @@ function Messaging() {
                       : 'hover:bg-[var(--background)]'
                   }`}
                 >
-                  <p className="truncate text-sm font-medium text-[var(--text)]">
-                    {user.name}
-                  </p>
+                  <div className="flex min-w-0 items-center gap-3">
+                    <Avatar
+                      name={user.name}
+                      src={user.avatarUrl}
+                      size="sm"
+                    />
 
-                  <p className="mt-0.5 truncate text-xs text-[var(--text-muted)]">
-                    {skills}
-                  </p>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-[var(--text)]">
+                        {user.name}
+                      </p>
+
+                      <p className="mt-0.5 truncate text-xs text-[var(--text-muted)]">
+                        {skills}
+                      </p>
+                    </div>
+                  </div>
                 </button>
               )
             })
@@ -392,7 +399,7 @@ function Messaging() {
             </header>
 
             {error && (
-              <p className="border-b border-[var(--border)] bg-red-50 px-5 py-2 text-sm text-[var(--error)]">
+              <p className="border-b border-[var(--error)]/20 bg-[var(--error)]/10 px-5 py-2.5 text-sm text-[var(--error)]">
                 {error}
               </p>
             )}

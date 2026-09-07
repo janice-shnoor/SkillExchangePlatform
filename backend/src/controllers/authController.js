@@ -77,3 +77,32 @@ export async function changePassword(req, res, next) {
     next(e)
   }
 }
+
+export async function forgotPassword(req, res, next) {
+  try {
+    await service.forgotPassword(
+      req.validated.body.email
+    )
+
+    res.status(200).json({
+      success: true,
+      message:
+        'If an account with that email exists, a password reset link has been sent.',
+    })
+  } catch (e) {
+    next(e)
+  }
+}
+
+export async function resetPassword(req, res, next) {
+  try {
+    await service.resetPassword(req.validated.body)
+
+    res.status(200).json({
+      success: true,
+      message: 'Password reset successfully',
+    })
+  } catch (e) {
+    next(e)
+  }
+}

@@ -73,7 +73,7 @@ function Register() {
 
             <div>
               <label
-                htmlFor="username"
+                htmlFor="name"
                 className="mb-2 block text-sm font-medium text-[var(--text)]"
               >
                 Name
@@ -86,13 +86,13 @@ function Register() {
                 placeholder="Your name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[var(--text)] outline-none transition placeholder:text-[var(--text-muted)] focus:border-[var(--primary)]"
+                className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[var(--text)] outline-none transition placeholder:text-[var(--text-muted)] focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20]"
               />
             </div>
 
             <div>
               <label
-                htmlFor="name"
+                htmlFor="username"
                 className="mb-2 block text-sm font-medium text-[var(--text)]"
               >
                 Username
@@ -105,7 +105,7 @@ function Register() {
                 placeholder="Your username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[var(--text)] outline-none transition placeholder:text-[var(--text-muted)] focus:border-[var(--primary)]"
+                className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[var(--text)] outline-none transition placeholder:text-[var(--text-muted)] focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20"
               />
             </div>
 
@@ -124,7 +124,7 @@ function Register() {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[var(--text)] outline-none transition placeholder:text-[var(--text-muted)] focus:border-[var(--primary)]"
+                className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[var(--text)] outline-none transition placeholder:text-[var(--text-muted)] focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20"
               />
             </div>
 
@@ -143,7 +143,7 @@ function Register() {
                 placeholder="Create a password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[var(--text)] outline-none transition placeholder:text-[var(--text-muted)] focus:border-[var(--primary)]"
+                className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[var(--text)] outline-none transition placeholder:text-[var(--text-muted)] focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20"
               />
             </div>
 
@@ -161,14 +161,14 @@ function Register() {
                 placeholder="Confirm your password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[var(--text)] outline-none transition placeholder:text-[var(--text-muted)] focus:border-[var(--primary)]"
+                className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[var(--text)] outline-none transition placeholder:text-[var(--text-muted)] focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20"
               />
 
             </div>
 
             {error && (
-              <p className="mb-5 text-right text-sm text-[var(--error)]">
-                {error}*
+              <p className="rounded-lg border border-[var(--error)]/20 bg-[var(--error)]/10 px-3 py-2.5 text-sm text-[var(--error)]">
+                {error}
               </p>
             )}
 
@@ -182,7 +182,7 @@ function Register() {
 
             {success && (
               <div className="mb-5 rounded-lg bg-green-50 px-4 py-3 text-center text-sm">
-                <p className="text-green-700">
+                <p className="text-[var(--success)]">
                   {success}
                 </p>
 
@@ -198,19 +198,16 @@ function Register() {
 
           </div>
 
-          <p className="mt-6 text-center text-sm text-[var(--text-muted)]">
-            {/*Already have an account?{' '}*/}
-            {!success && (
-              <p className="mt-6 text-center text-sm text-[var(--text-muted)]">
-                <Link
-                  to="/login"
-                  className="font-medium text-[var(--primary-hover)] transition hover:text-[var(--primary)]"
-                >
-                  Login?
-                </Link>
-              </p>
-            )}
-          </p>
+          {!success && (
+            <p className="mt-6 text-center text-sm text-[var(--text-muted)]">
+              <Link
+                to="/login"
+                className="font-medium text-[var(--primary-hover)] transition hover:text-[var(--primary)]"
+              >
+                Login?
+              </Link>
+            </p>
+          )}
 
         </form>
 

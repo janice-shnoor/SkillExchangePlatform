@@ -13,6 +13,7 @@ export async function getUserExchanges(userId) {
         select: {
           id: true,
           username: true,
+          avatarUrl: true,
           name: true,
         },
       },
@@ -20,6 +21,7 @@ export async function getUserExchanges(userId) {
         select: {
           id: true,
           username: true,
+          avatarUrl: true,
           name: true,
         },
       },
@@ -46,6 +48,7 @@ export async function getExchangeById(exchangeId, userId) {
         select: {
           id: true,
           username: true,
+          avatarUrl: true,
           name: true,
         },
       },
@@ -53,6 +56,7 @@ export async function getExchangeById(exchangeId, userId) {
         select: {
           id: true,
           username: true,
+          avatarUrl: true,
           name: true,
         },
       },

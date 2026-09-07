@@ -30,6 +30,7 @@ export async function searchUsers(
       id: true,
       name: true,
       username: true,
+      avatarUrl: true,
 
       userSkills: {
         include: {
@@ -132,6 +133,7 @@ export async function getRecommendations(userId) {
       id: true,
       name: true,
       username: true,
+      avatarUrl: true,
 
       userSkills: {
         include: {

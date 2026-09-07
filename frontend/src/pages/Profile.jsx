@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import { Pencil } from 'lucide-react'
 import FormDialog from '../components/FormDialog'
 import ProfileSkills from '../components/ProfileSkills'
+import Avatar from '../components/Avatar'
+import AvatarEditor from '../components/AvatarEditor'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -27,6 +29,7 @@ function Profile() {
   const [changingPassword, setChangingPassword] = useState(false)
   const [passwordLoading, setPasswordLoading] = useState(false)
   const [passwordSuccess, setPasswordSuccess] = useState('')
+  const [editingAvatar, setEditingAvatar] = useState(false)
 
   useEffect(() => {
     fetch(`${API_URL}/profile`, {
@@ -139,7 +142,7 @@ function Profile() {
       </div>
 
       {error && (
-        <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-[var(--error)]">
+        <p className="rounded-lg border border-[var(--error)]/20 bg-[var(--error)]/10 px-3 py-2.5 text-sm text-[var(--error)]">
           {error}
         </p>
       )}
@@ -147,9 +150,22 @@ function Profile() {
       <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:p-6">
         <div className="flex items-center justify-between gap-4">
           <div className="flex min-w-0 items-center gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[var(--primary-subtle)] text-xl font-semibold text-[var(--primary-hover)]">
-              {user.name.charAt(0).toUpperCase()}
-            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setError('')
+                setEditingAvatar(true)
+              }}
+              aria-label="Edit profile photo"
+              className="shrink-0 rounded-full outline-none ring-offset-2 transition focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
+            >
+              <Avatar
+                name={user.name}
+                src={user.avatarUrl}
+                size="lg"
+                className="transition-opacity hover:opacity-90"
+              />
+            </button>
 
             <div className="min-w-0">
               <h2 className="truncate text-xl font-semibold text-[var(--text)]">
@@ -277,6 +293,13 @@ function Profile() {
           submitLabel="Save Changes"
           onSubmit={updateProfile}
           onClose={() => setEditing(false)}
+        />
+      )}
+      {editingAvatar && (
+        <AvatarEditor
+          user={user}
+          onUpdate={setUser}
+          onClose={() => setEditingAvatar(false)}
         />
       )}
       {changingPassword && (

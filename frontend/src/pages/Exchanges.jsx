@@ -489,7 +489,7 @@ function Exchanges() {
       )}
 
       {!loading && error && (
-        <p className="text-sm text-[var(--error)]">
+        <p className="rounded-lg border border-[var(--error)]/20 bg-[var(--error)]/10 px-3 py-2.5 text-sm text-[var(--error)]">
           {error}
         </p>
       )}

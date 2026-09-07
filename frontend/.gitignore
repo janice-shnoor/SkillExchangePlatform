@@ -25,11 +25,12 @@ coverage/
 test-results/
 playwright-report/
 
-# Cache / temporary
+# Cache / temporary / assets
 .cache/
 .tmp/
 temp/
 *.tmp
+src/assets/
 
 # Editor directories and files
 .vscode/*

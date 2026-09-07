@@ -7,6 +7,8 @@ import routes from './routes/index.js'
 import { errorHandler } from './utils/errors.js'
 import cookieParser from 'cookie-parser'
 
+import path from 'path'
+
 export const app = express()
 
 app.use(helmet())
@@ -27,6 +29,20 @@ app.get('/health', (req, res) =>
     status: 'ok',
     service: env.APP_NAME
   })
+)
+
+app.use(
+  '/uploads',
+  (req, res, next) => {
+    res.setHeader(
+      'Cross-Origin-Resource-Policy',
+      'cross-origin'
+    )
+    next()
+  },
+  express.static(
+    path.resolve(process.cwd(), 'uploads')
+  )
 )
 
 app.use('/api', routes)

@@ -1,7 +1,6 @@
 import bgImage from '../assets/bg.jpg'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Link } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { loginUser } from '../api/auth'
 
 function Login() {
@@ -29,14 +28,14 @@ function Login() {
     try {
       const data = await loginUser(email, password)
 
-      console.log('Login successful:', data)
-
       setEmail('')
       setPassword('')
 
       navigate(data.user.role === 'ADMIN' ? '/admin' : '/dashboard')
     } catch (error) {
       setError(error.message)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -44,41 +43,65 @@ function Login() {
     <div className="min-h-screen bg-[var(--background)] lg:flex">
 
     {/* Mobile Branding */}
-    <div className="flex h-20 items-center justify-center bg-[var(--dark)] px-5 lg:hidden">
-      <h2
-        className="text-xl font-bold tracking-tight"
-        style={{ color: 'var(--primary)' }}
-      >
-        Skill Exchange Platfrom
-      </h2>
+    <div
+      className="relative flex min-h-32 flex-col items-center justify-center overflow-hidden px-5 lg:hidden"
+      style={{
+        backgroundImage: `url(${bgImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }}
+    >
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-[var(--dark)]/65" />
+
+      {/* Branding Content */}
+      <div className="relative z-10 text-center">
+        <h2
+          className="text-2xl font-bold tracking-tight sm:text-3xl"
+          style={{ color: 'var(--primary)' }}
+        >
+          Skill Exchange Platform
+        </h2>
+
+        <p className="mt-2 text-sm text-[var(--text-on-dark)] sm:text-base">
+          A Community platform to offer skills and learn.
+        </p>
+      </div>
     </div>
 
-      {/*<div className="hidden lg:block lg:w-[35%]">
-        <img
-          src={bgImage}
-          alt="People exchanging skills"
-          className="h-screen w-full object-cover"
-        />
-      </div> */}
-
       {/* Desktop Branding */}
-      <div className="hidden items-center justify-center bg-[var(--dark)] lg:flex lg:min-h-screen lg:w-[35%]">
-        <div className="px-8 text-center">
-          <h2
-            className="text-5xl font-bold"
-            style={{ color: 'var(--primary)' }}
-          >
-            Skill Exchange Platfrom
-          </h2>
+      <div
+        className="relative hidden min-h-screen overflow-hidden lg:block lg:w-[45%]"
+        style={{
+          backgroundImage: `url(${bgImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      >
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-[var(--dark)]/65" />
 
-          <p className="mt-4 text-[var(--text-on-dark)]">
-            A Community platform to offer skills and learn.
-          </p>
+        {/* Branding Content */}
+        <div className="relative z-10 flex min-h-screen items-start justify-center px-8 pt-[10vh]">
+          <div className="max-w-sm text-center">
+            <h2
+              className="text-5xl font-bold tracking-tight"
+              style={{ color: 'var(--primary)' }}
+            >
+              Skill Exchange Platform
+            </h2>
+
+            <p className="mt-4 text-lg text-[var(--text-on-dark)]">
+              A Community platform to offer skills and learn.
+            </p>
+          </div>
         </div>
       </div>
 
       {/* Login */}
-      <div className="flex min-h-[calc(100vh-3.5rem)] w-full items-center justify-center bg-[var(--background)] px-6 py-10 lg:min-h-screen lg:w-[65%] lg:py-12">
+      <div className="flex min-h-[calc(100vh-8rem)] w-full items-center justify-center bg-[var(--background)] px-6 py-10 lg:min-h-screen lg:w-[55%] lg:py-12">
         <div className="w-full max-w-md">
 
           <h1 className="text-2xl font-bold text-[var(--text)] sm:text-3xl">
@@ -115,8 +138,7 @@ function Login() {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[var(--text)] outline-none transition placeholder:text-[var(--text-muted)] focus:border-[var(--primary)]"
-              />
+                className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[var(--text)] outline-none transition placeholder:text-[var(--text-muted)] focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20"              />
             </div>
 
             <div>
@@ -134,15 +156,22 @@ function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
-                className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[var(--text)] outline-none transition placeholder:text-[var(--text-muted)] focus:border-[var(--primary)]"
+                className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[var(--text)] outline-none transition placeholder:text-[var(--text-muted)] focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20"
               />
+            </div>
+
+            <div className="flex justify-end"> 
+              <Link to="/forgot-password" className="text-sm font-medium text-[var(--primary-hover)] transition hover:text-[var(--primary)]" > 
+                Forgot password? 
+              </Link> 
             </div>
 
             <button
               type="submit"
-              className="w-full rounded-lg bg-[var(--primary)] px-4 py-3 font-medium text-[var(--dark)] transition hover:bg-[var(--primary-hover)]"
+              disabled={loading}
+              className="w-full rounded-lg bg-[var(--primary)] px-4 py-3 font-medium text-[var(--dark)] transition-colors duration-200 hover:bg-[var(--primary-hover)] disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Sign in
+              {loading ? 'Signing in...' : 'Sign in'}
             </button>
 
           </form>

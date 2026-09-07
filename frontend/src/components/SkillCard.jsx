@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import FormDialog from './FormDialog'
+import Avatar from './Avatar'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -85,14 +86,22 @@ function SkillCard({ user }) {
 
       {/* User Header */}
       <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <h3 className="truncate text-base font-semibold text-[var(--text)]">
-            {user.name}
-          </h3>
+        <div className="flex min-w-0 items-center gap-3">
+          <Avatar
+            name={user.name}
+            src={user.avatarUrl}
+            size="sm"
+          />
 
-          <p className="mt-0.5 text-xs text-[var(--text-muted)]">
-            @{user.username}
-          </p>
+          <div className="min-w-0">
+            <h3 className="truncate text-base font-semibold text-[var(--text)]">
+              {user.name}
+            </h3>
+
+            <p className="mt-0.5 text-xs text-[var(--text-muted)]">
+              @{user.username}
+            </p>
+          </div>
         </div>
 
         <p className="shrink-0 text-[11px] text-[var(--text-muted)]">

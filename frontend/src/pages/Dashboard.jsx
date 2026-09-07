@@ -2,6 +2,12 @@ import { useEffect, useState } from 'react'
 import ExchangeRequestRow from '../components/ExchangeRequestRow'
 import Table from '../components/Table'
 
+import {
+  Layers3,
+  ArrowLeftRight,
+  Repeat2,
+} from 'lucide-react'
+
 const API_URL = import.meta.env.VITE_API_URL
 
 async function fetchData(path) {
@@ -158,52 +164,84 @@ function Dashboard() {
     <div className="w-full space-y-8">
       {/* Header */}
       <div>
-        <p className="mt-2 text-[var(--text-muted)]">
+        <p className="text-sm text-[var(--text-muted)]">
           Welcome back,
         </p>
-        <h1 className="text-3xl font-bold text-[var(--text)]">
+
+        <h1 className="mt-1 text-3xl font-bold tracking-tight text-[var(--text)]">
           {user.name}
         </h1>
-
-
       </div>
 
       {/* Stats */}
       <section>
         <div className="grid gap-4 sm:grid-cols-3">
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5">
-            <p className="text-xs font-medium uppercase tracking-wide text-[var(--text-muted)]">
-              Skills
-            </p>
-            <p className="mt-2 text-2xl font-bold text-[var(--text)]">
-              {offered.length + wanted.length}
-            </p>
+
+          {/* Skills */}
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 transition-colors duration-200 hover:border-[var(--primary)]">
+            <div className="flex items-center gap-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--primary-subtle)] text-[var(--primary-hover)]">
+                <Layers3 size={18} strokeWidth={1.8} />
+              </div>
+
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-[var(--text-muted)]">
+                  Skills
+                </p>
+
+                <p className="mt-1 text-2xl font-bold text-[var(--text)]">
+                  {offered.length + wanted.length}
+                </p>
+              </div>
+            </div>
           </div>
 
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5">
-            <p className="text-xs font-medium uppercase tracking-wide text-[var(--text-muted)]">
-              Requests
-            </p>
-            <p className="mt-2 text-2xl font-bold text-[var(--text)]">
-              {sentRequests.length + receivedRequests.length}
-            </p>
+          {/* Requests */}
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 transition-colors duration-200 hover:border-[var(--primary)]">
+            <div className="flex items-center gap-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--primary-subtle)] text-[var(--primary-hover)]">
+                <ArrowLeftRight size={18} strokeWidth={1.8} />
+              </div>
+
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-[var(--text-muted)]">
+                  Requests
+                </p>
+
+                <p className="mt-1 text-2xl font-bold text-[var(--text)]">
+                  {sentRequests.length + receivedRequests.length}
+                </p>
+              </div>
+            </div>
           </div>
 
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5">
-            <p className="text-xs font-medium uppercase tracking-wide text-[var(--text-muted)]">
-              Exchanges
-            </p>
-            <p className="mt-2 text-2xl font-bold text-[var(--text)]">
-              {exchanges.length}
-            </p>
+          {/* Exchanges */}
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 transition-colors duration-200 hover:border-[var(--primary)]">
+            <div className="flex items-center gap-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--primary-subtle)] text-[var(--primary-hover)]">
+                <Repeat2 size={18} strokeWidth={1.8} />
+              </div>
+
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-[var(--text-muted)]">
+                  Exchanges
+                </p>
+
+                <p className="mt-1 text-2xl font-bold text-[var(--text)]">
+                  {exchanges.length}
+                </p>
+              </div>
+            </div>
           </div>
+
         </div>
       </section>
 
       {/* Dashboard Overview */}
-      <div className="grid w-full min-w-0 gap-6 lg:grid-cols-[3fr_2fr]">        {/* Recent Requests */}
-        <section className="min-w-0 rounded-2xl border border-[var(--border)] bg-[var(--surface)]">          <div className="p-6 pb-4 sm:p-8 sm:pb-5">
-            <h2 className="text-lg font-semibold text-[var(--text)]">
+      <div className="grid w-full min-w-0 gap-6 lg:grid-cols-[3fr_2fr]">        
+        {/* Recent Requests */}
+        <section className="min-w-0 rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm">          <div className="p-6 pb-4 sm:p-8 sm:pb-5">
+            <h2 className="text-lg font-semibold tracking-tight text-[var(--text)]">
               Recent Requests
             </h2>
           </div>
@@ -259,9 +297,9 @@ function Dashboard() {
         </section>
 
         {/* Recent Exchanges */}
-        <section className="min-w-0 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8">          
+        <section className="min-w-0 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm sm:p-8">          
           <div>
-            <h2 className="text-lg font-semibold text-[var(--text)]">
+            <h2 className="text-lg font-semibold tracking-tight text-[var(--text)]">
               Exchanges
             </h2>
           </div>

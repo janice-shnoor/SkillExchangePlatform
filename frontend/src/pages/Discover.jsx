@@ -207,7 +207,7 @@ function Discover() {
       {/* Search Results */}
       {hasSearched && (
         <section>
-          <h2 className="text-xl font-semibold text-[var(--text)]">
+          <h2 className="text-xl font-semibold tracking-tight text-[var(--text)]">
             Search Results
           </h2>
 
@@ -217,8 +217,8 @@ function Discover() {
                 Searching...
               </p>
             ) : error ? (
-              <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-[var(--error)]">
-                {error}
+              <p className="rounded-lg border border-[var(--error)]/20 bg-[var(--error)]/10 px-3 py-2.5 text-sm text-[var(--error)]">
+                 {error}
               </p>
             ) : results.length === 0 ? (
               <p className="text-sm text-[var(--text-muted)]">
@@ -237,7 +237,7 @@ function Discover() {
 
       {/* Recommendations */}
       <section>
-        <h2 className="text-xl font-semibold text-[var(--text)]">
+        <h2 className="text-xl font-semibold tracking-tight text-[var(--text)]">
           Recommendations
         </h2>
 
@@ -247,7 +247,7 @@ function Discover() {
               Loading recommendations...
             </p>
           ) : recommendationError ? (
-            <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-[var(--error)]">
+            <p className="rounded-lg border border-[var(--error)]/20 bg-[var(--error)]/10 px-3 py-2.5 text-sm text-[var(--error)]">
               {recommendationError}
             </p>
           ) : recommendations.length === 0 ? (

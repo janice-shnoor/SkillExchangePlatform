@@ -1,3 +1,5 @@
+import multer from 'multer'
+
 export class AppError extends Error {
   constructor(message, statusCode = 500, details = null) {
     super(message)
@@ -15,6 +17,19 @@ export function errorHandler(err, req, res, next) {
 
   let statusCode = err.statusCode || 500
   let message = err.message || 'Internal server error'
+
+  // Multer upload errors
+  if (err instanceof multer.MulterError) {
+    statusCode = 400
+
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      message = 'Image must be 5 MB or smaller'
+    } else if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+      message = 'Only JPG, PNG images are allowed'
+    } else {
+      message = 'Invalid image upload'
+    }
+  }
 
   // Prisma unique constraint error
   if (err.code === 'P2002') {

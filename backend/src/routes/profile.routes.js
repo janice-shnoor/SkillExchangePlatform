@@ -5,6 +5,8 @@ import { authenticate } from '../middleware/auth.js'
 import {
   getProfile,
   updateProfile,
+  uploadAvatar,
+  removeAvatar,
 } from '../controllers/userController.js'
 
 import {
@@ -24,10 +26,14 @@ import {
   resourceIdSchema,
 } from '../validators/validator.js'
 
+import { uploadAvatarM } from '../middleware/uploadAvatar.js'
+
 const router = Router()
 
 router.get('/',authenticate,getProfile)
 router.patch('/',authenticate,validate(updateProfileSchema),updateProfile)
+router.post('/avatar',authenticate,uploadAvatarM.single('avatar'),uploadAvatar)
+router.delete('/avatar',authenticate,removeAvatar)
 router.get('/skills/offered',authenticate,getOfferedSkills)
 router.get('/skills/wanted',authenticate,getWantedSkills)
 router.post('/skills',authenticate,validate(addUserSkillSchema),addUserSkill)

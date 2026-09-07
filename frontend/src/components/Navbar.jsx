@@ -13,6 +13,7 @@ import {
   Sun,
   Moon,
 } from 'lucide-react'
+import Avatar from '../components/Avatar'
 
 function Navbar() {
   const navigate = useNavigate()
@@ -186,9 +187,11 @@ function Navbar() {
               </p>
             </div>
             {/* Avatar */}
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--primary)]/10 text-xs font-bold text-[var(--primary)]">
-              {user?.name?.charAt(0).toUpperCase() || 'A'}
-            </div>
+            <Avatar
+              name={user?.name || ''}
+              src={user?.avatarUrl || ''}
+              size="sm"
+            />
           </div>
         </div>
       </nav>

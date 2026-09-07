@@ -35,3 +35,20 @@ export const changePasswordSchema = z.object({
   params: z.object({}),
   query: z.object({}),
 })
+
+export const forgotPasswordSchema = z.object({
+  body: z.object({
+    email: emailSchema,
+  }),
+  params: z.object({}),
+  query: z.object({}),
+})
+
+export const resetPasswordSchema = z.object({
+  body: z.object({
+    token: z.string().min(1, 'Reset token is required'),
+    newPassword: passwordSchema,
+  }),
+  params: z.object({}),
+  query: z.object({}),
+})

@@ -2,10 +2,20 @@ import { useEffect, useState } from 'react'
 import AdminTable from '../Table'
 import ConfirmDialog from '../ConfirmDialog'
 import FormDialog from '../FormDialog'
+import Avatar from '../Avatar'
 
 const API_URL = import.meta.env.VITE_API_URL
 
 const userColumns = [
+  { key: 'avatar', label: '',
+    render: (user) => (
+      <Avatar
+        name={user.name}
+        src={user.avatarUrl}
+        size="sm"
+      />
+    ),
+  },
   { key: 'name', label: 'Name' },
   { key: 'username', label: 'Username' },
   { key: 'email', label: 'Email' },
