@@ -59,9 +59,23 @@ export async function updateUser(req, res, next) {
   }
 }
 
+// Delete -> Row
 export async function deleteUser(req, res, next) {
   try {
     await service.deleteUser(req.params.id)
+
+    res.status(200).json({
+      success: true,
+      message: 'User deleted',
+    })
+  } catch (e) {
+    next(e)
+  }
+}
+
+export async function softDeleteUser(req, res, next) {
+  try {
+    await service.softDeleteUser(req.params.id)
 
     res.status(200).json({
       success: true,

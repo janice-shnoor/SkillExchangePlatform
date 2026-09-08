@@ -16,6 +16,7 @@ model User {
   passwordHash        String            @map("password_hash")
   role                UserRole          @default(USER)
   updatedAt           DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt           DateTime?         @map("deleted_at") @db.Timestamptz(6)
   receivedRequests    ExchangeRequest[] @relation("ReceivedRequests")
   sentRequests        ExchangeRequest[] @relation("SentRequests")
   exchangesAsUserA    Exchange[]        @relation("ExchangesAsUserA")

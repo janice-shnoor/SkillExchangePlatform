@@ -9,6 +9,7 @@ export async function searchUsers(
       id: {
         not: userId,
       },
+      deletedAt: null,
 
       userSkills: {
         some: {
@@ -102,7 +103,7 @@ export async function getRecommendations(userId) {
       id: {
         not: userId,
       },
-
+      deletedAt: null,
       AND: [
         {
           userSkills: {

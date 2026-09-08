@@ -6,16 +6,22 @@ export async function createExchangeRequest(
 ) {
   const [sender, receiver, senderSkill, receiverSkill] =
     await Promise.all([
-      prisma.user.findUnique({
-        where: { id: senderId },
+      prisma.user.findFirst({
+        where: {
+          id: senderId,
+          deletedAt: null,
+        },
         select: {
           id: true,
           username: true,
         },
       }),
 
-      prisma.user.findUnique({
-        where: { id: receiverId },
+      prisma.user.findFirst({
+        where: {
+          id: receiverId,
+          deletedAt: null,
+        },
         select: {
           id: true,
           username: true,

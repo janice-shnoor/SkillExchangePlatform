@@ -48,9 +48,10 @@ export async function register({
 }
 
 export async function login({ email, password }) {
-  const user = await prisma.user.findUnique({
+  const user = await prisma.user.findFirst({
     where: {
       email,
+      deletedAt: null,
     },
   })
 
@@ -92,9 +93,10 @@ export async function login({ email, password }) {
 }
 
 export async function getCurrentUser(userId) {
-  const user = await prisma.user.findUnique({
+  const user = await prisma.user.findFirst({
     where: {
       id: userId,
+      deletedAt: null,
     },
     select: {
       id: true,
@@ -118,9 +120,10 @@ export async function changePassword(
   currentPassword,
   newPassword
 ) {
-  const user = await prisma.user.findUnique({
+  const user = await prisma.user.findFirst({
     where: {
       id: userId,
+      deletedAt: null,
     },
     select: {
       passwordHash: true,
@@ -157,8 +160,8 @@ export async function changePassword(
 }
 
 export async function forgotPassword(email) {
-  const user = await prisma.user.findUnique({
-    where: { email },
+  const user = await prisma.user.findFirst({
+    where: { email, deletedAt: null, },
     select: {
       id: true,
       email: true,
@@ -253,13 +256,19 @@ export async function resetPassword({ token, newPassword }) {
       userId: true,
       expiresAt: true,
       usedAt: true,
+      user: {
+        select: {
+          deletedAt: true,
+        },
+      },
     },
   })
 
   if (
     !resetToken ||
     resetToken.usedAt ||
-    resetToken.expiresAt <= new Date()
+    resetToken.expiresAt <= new Date() ||
+    resetToken.user.deletedAt
   ) {
     const error = new Error('Invalid or expired password reset token')
     error.statusCode = 400

@@ -44,7 +44,7 @@ function Dashboard() {
             ? exchange.userB
             : exchange.userA
 
-        return `@${otherUser.username}`
+        return otherUser.username.startsWith('deleted_') ? 'DeletedUser' : `@${otherUser.username}`
       },
     },
     {
@@ -238,7 +238,7 @@ function Dashboard() {
       </section>
 
       {/* Dashboard Overview */}
-      <div className="grid w-full min-w-0 gap-6 lg:grid-cols-[3fr_2fr]">        
+      <div className="grid w-full min-w-0 gap-6 lg:grid-cols-[5fr_4fr]">        
         {/* Recent Requests */}
         <section className="min-w-0 rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm">          <div className="p-6 pb-4 sm:p-8 sm:pb-5">
             <h2 className="text-lg font-semibold tracking-tight text-[var(--text)]">

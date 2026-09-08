@@ -12,7 +12,7 @@ import {
 import {
   getUsers,
   updateUser,
-  deleteUser,
+  softDeleteUser,
 } from '../controllers/userController.js'
 
 import {
@@ -22,11 +22,15 @@ import {
   deleteSkill,
 } from '../controllers/skillController.js'
 
+import { getOverview } from '../controllers/adminController.js'
+
 const router = express.Router()
 
+router.get('/overview',authenticate,authorize('ADMIN'),getOverview)
 router.get('/users', authenticate, authorize('ADMIN'),getUsers)
 router.patch('/users/:id',authenticate, authorize('ADMIN'),validate(updateUserSchema),updateUser)
-router.delete('/users/:id',authenticate,authorize('ADMIN'),validate(resourceIdSchema),deleteUser)
+//router.delete('/users/:id',authenticate,authorize('ADMIN'),validate(resourceIdSchema),deleteUser)
+router.delete('/users/:id',authenticate,authorize('ADMIN'), softDeleteUser)
 router.get('/skills',authenticate,authorize('ADMIN'),getSkills)
 router.post('/skills',authenticate,authorize('ADMIN'),validate(createSkillSchema),createSkill)
 router.patch('/skills/:id',authenticate,authorize('ADMIN'),validate(updateSkillSchema),updateSkill)

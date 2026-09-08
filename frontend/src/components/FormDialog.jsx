@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react'
 
-const inputClass =
-  'w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[var(--text)] outline-none'
-
+const inputClass = 'w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[var(--text)] outline-none transition-colors duration-200 placeholder:text-[var(--text-muted)] focus:border-[var(--primary)]'
 function FormDialog({
   title,
   description,
@@ -18,8 +16,8 @@ function FormDialog({
   const [formError, setFormError] = useState('')
   
   useEffect(() => {
-    setForm(initialValues)
-  }, [])
+  setForm(initialValues)
+}, [])
 
   function handleChange(e) {
     const { name, value } = e.target
@@ -79,7 +77,7 @@ function FormDialog({
         )}
 
         {(formError || error) && (
-          <p className="mt-4 rounded-lg bg-red-50 px-3 py-2.5 text-sm text-[var(--error)]">
+          <p className="mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-[var(--error)] dark:border-red-900/40 dark:bg-red-950/20">
             {formError || error}
           </p>
         )}
@@ -144,7 +142,7 @@ function FormDialog({
               type="button"
               onClick={handleClose}
               disabled={loading}
-              className="rounded-lg border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--text)] disabled:opacity-50"
+              className="rounded-lg border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--text)] transition-colors duration-200 hover:bg-[var(--surface-hover)] disabled:pointer-events-none disabled:opacity-50"
             >
               Cancel
             </button>
@@ -152,7 +150,7 @@ function FormDialog({
             <button
               type="submit"
               disabled={loading}
-              className="rounded-lg bg-[var(--primary)] px-3 py-2 text-sm font-medium text-[var(--dark)] disabled:opacity-50"
+              className="rounded-lg bg-[var(--primary)] px-3 py-2 text-sm font-medium text-[var(--dark)] transition-colors duration-200 hover:bg-[var(--primary-hover)] disabled:pointer-events-none disabled:opacity-50"
             >
               {loading ? 'Saving...' : submitLabel}
             </button>

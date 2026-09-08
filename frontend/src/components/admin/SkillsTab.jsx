@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react'
 import AdminTable from '../Table'
 import ConfirmDialog from '../ConfirmDialog'
 import FormDialog from '../FormDialog'
-import { Plus } from 'lucide-react'
+import {
+  Plus,
+  Search,
+  X,
+} from 'lucide-react'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -43,6 +47,7 @@ function SkillsTab() {
   const [editingSkill, setEditingSkill] = useState(null)
   const [deletingSkill, setDeletingSkill] = useState(null)
   const [addingSkill, setAddingSkill] = useState(false)
+  const [search, setSearch] = useState('')
 
   useEffect(() => {
     loadSkills()
@@ -130,6 +135,15 @@ function SkillsTab() {
     }
   }
 
+  const filteredSkills = skills.filter((skill) => {
+    const searchValue = search.trim().toLowerCase()
+
+    return (
+      !searchValue ||
+      skill.name.toLowerCase().includes(searchValue)
+    )
+  })
+
   if (loading) {
     return (
       <p className="text-sm text-[var(--text-muted)]">
@@ -140,12 +154,50 @@ function SkillsTab() {
 
   return (
   <>
-    <div className="flex justify-end pb-1 pt-1">
+    <div className="flex items-center gap-3 pb-4 pt-3">
+      {/* Search */}
+      <div className="relative flex-1">
+        <input
+          type="text"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder="Search"
+          className="h-9 w-full rounded-md border border-[var(--border)] bg-[var(--surface)] pl-3 pr-20 text-sm text-[var(--text)] outline-none transition-colors duration-200 placeholder:text-[var(--text-muted)] focus:border-[var(--primary)]"
+        />
+
+        {search && (
+          <button
+            type="button"
+            onClick={() => setSearch('')}
+            aria-label="Clear search"
+            className="absolute right-9 top-1/2 -translate-y-1/2 text-[var(--text-muted)] transition-colors duration-200 hover:text-[var(--text)]"
+          >
+            <X
+              size={15}
+              strokeWidth={1.8}
+            />
+          </button>
+        )}
+
+        <button
+          type="button"
+          onClick={() => setSearch(search.trim())}
+          aria-label="Search"
+          className="absolute right-1.5 top-1/2 inline-flex -translate-y-1/2 items-center justify-center rounded-md p-1 text-[var(--text-muted)] transition-colors duration-200 hover:bg-[var(--surface-hover)] hover:text-[var(--text)]"
+        >
+          <Search
+            size={15}
+            strokeWidth={1.8}
+          />
+        </button>
+      </div>
+
+      {/* Add Skill */}
       <button
         type="button"
         onClick={() => setAddingSkill(true)}
         disabled={actionLoading}
-        className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium text-[var(--primary-hover)] transition hover:bg-[var(--primary-subtle)] disabled:opacity-50"
+        className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md px-2 text-sm font-medium text-[var(--primary-hover)] transition hover:bg-[var(--primary-subtle)] disabled:opacity-50"
       >
         <Plus size={15} />
         Add Skill
@@ -161,14 +213,16 @@ function SkillsTab() {
     )}
 
     <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)]">
-    {skills.length === 0 ? (
+    {filteredSkills.length === 0 ? (
       <p className="px-6 py-6 text-sm text-[var(--text-muted)]">
-        No skills found.
+        {skills.length === 0
+          ? 'No skills found.'
+          : 'No skills match your search.'}
       </p>
     ) : (
       <AdminTable
         columns={skillColumns}
-        data={skills}
+        data={filteredSkills}
         renderActions={(skill) => (
           <div className="flex gap-3">
             <button

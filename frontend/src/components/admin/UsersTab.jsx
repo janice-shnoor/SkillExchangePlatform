@@ -4,6 +4,12 @@ import ConfirmDialog from '../ConfirmDialog'
 import FormDialog from '../FormDialog'
 import Avatar from '../Avatar'
 
+import {
+  Search,
+  X,
+  ChevronDown,
+} from 'lucide-react'
+
 const API_URL = import.meta.env.VITE_API_URL
 
 const userColumns = [
@@ -60,6 +66,8 @@ function UsersTab() {
   const [error, setError] = useState('')
   const [editingUser, setEditingUser] = useState(null)
   const [deletingUser, setDeletingUser] = useState(null)
+  const [search, setSearch] = useState('')
+  const [roleFilter, setRoleFilter] = useState('ALL')
 
   useEffect(() => {
     loadUsers()
@@ -125,6 +133,22 @@ function UsersTab() {
     }
   }
 
+  const filteredUsers = users.filter((user) => {
+    const searchValue = search.trim().toLowerCase()
+
+    const matchesSearch =
+      !searchValue ||
+      user.name.toLowerCase().includes(searchValue) ||
+      user.username.toLowerCase().includes(searchValue) ||
+      user.email.toLowerCase().includes(searchValue)
+
+    const matchesRole =
+      roleFilter === 'ALL' ||
+      user.role === roleFilter
+
+    return matchesSearch && matchesRole
+  })
+
   if (loading) {
     return (
       <p className="text-sm text-[var(--text-muted)]">
@@ -140,16 +164,71 @@ function UsersTab() {
           {error}
         </p>
       )}
-    <div className='pt-3'></div>
+    <div className="flex items-center gap-3 pb-4 pt-3">
+      {/* Search */}
+      <div className="relative flex-1">
+        <input
+          type="text"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder="Search"
+          className="h-9 w-full rounded-md border border-[var(--border)] bg-[var(--surface)] pl-3 pr-20 text-sm text-[var(--text)] outline-none transition-colors duration-200 placeholder:text-[var(--text-muted)] focus:border-[var(--primary)]"
+        />
+
+        {search && (
+          <button
+            type="button"
+            onClick={() => setSearch('')}
+            aria-label="Clear search"
+            className="absolute right-9 top-1/2 -translate-y-1/2 text-[var(--text-muted)] transition-colors duration-200 hover:text-[var(--text)]"
+          >
+            <X size={15} strokeWidth={1.8} />
+          </button>
+        )}
+
+        <button
+          type="button"
+          onClick={() => setSearch(search.trim())}
+          aria-label="Search"
+          className="absolute right-1.5 top-1/2 inline-flex -translate-y-1/2 items-center justify-center rounded-md p-1 text-[var(--text-muted)] transition-colors duration-200 hover:bg-[var(--surface-hover)] hover:text-[var(--text)]"
+        >
+          <Search
+            size={15}
+            strokeWidth={1.8}
+          />
+        </button>
+      </div>
+
+      {/* Role Filter */}
+      <div className="relative w-32 shrink-0">
+        <select
+          value={roleFilter}
+          onChange={(event) => setRoleFilter(event.target.value)}
+          className="h-9 w-full appearance-none rounded-md border border-[var(--border)] bg-[var(--surface)] pl-3 pr-8 text-sm text-[var(--text)] outline-none transition-colors duration-200 focus:border-[var(--primary)]"
+        >
+          <option value="ALL">All</option>
+          <option value="USER">USER</option>
+          <option value="ADMIN">ADMIN</option>
+        </select>
+
+        <ChevronDown
+          size={15}
+          strokeWidth={1.8}
+          className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"
+        />
+      </div>
+    </div>
     <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)]">
-      {users.length === 0 ? (
-        <p className="text-sm text-[var(--text-muted)]">
-          No users found.
+      {filteredUsers.length === 0 ? (
+        <p className="px-6 py-6 text-sm text-[var(--text-muted)]">
+          {users.length === 0
+            ? 'No users found.'
+            : 'No users match your search.'}
         </p>
       ) : (
         <AdminTable
           columns={userColumns}
-          data={users}
+          data={filteredUsers}
           renderActions={(user) => (
             <div className="flex gap-3">
               <button

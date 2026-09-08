@@ -13,7 +13,7 @@ function MainLayout() {
         </div>
       </main>
 
-      <Footer />
+      <Footer withSidebar />
     </div>
   )
 }

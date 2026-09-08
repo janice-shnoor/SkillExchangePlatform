@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import UsersTab from '../components/admin/UsersTab'
 import SkillsTab from '../components/admin/SkillsTab'
+import OverviewTab from '../components/admin/OverviewTab'
 
 function Admin() {
-  const [activeTab, setActiveTab] = useState('users')
+  const [activeTab, setActiveTab] = useState('overview')
 
   return (
     <div className="space-y-6">
@@ -15,7 +16,7 @@ function Admin() {
 
       <div>
         <div className="flex gap-6 border-b border-[var(--border)]">
-          {['users', 'skills'].map((tab) => (
+          {['overview', 'users', 'skills'].map((tab) => (
             <button
               key={tab}
               type="button"
@@ -30,8 +31,9 @@ function Admin() {
             </button>
           ))}
         </div>
-
-        {activeTab === 'users' ? <UsersTab /> : <SkillsTab />}
+          {activeTab === 'overview' && <OverviewTab />}
+          {activeTab === 'users' && <UsersTab />}
+          {activeTab === 'skills' && <SkillsTab />}
       </div>
     </div>
   )
