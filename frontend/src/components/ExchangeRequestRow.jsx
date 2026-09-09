@@ -35,7 +35,7 @@ function ExchangeRequestRow({
 
   return (
     <div
-      className={`grid items-center gap-2 border-b border-[var(--border)] px-3 py-3 last:border-b-0 ${
+      className={`grid min-w-[520px] items-center gap-2 border-b border-[var(--border)] px-3 py-3 last:border-b-0 ${
         showActions
           ? 'grid-cols-[80px_minmax(0,1fr)_auto] sm:grid-cols-[120px_1fr_150px]'
           : 'grid-cols-[80px_minmax(0,1fr)_auto] sm:grid-cols-[120px_1fr_100px]'

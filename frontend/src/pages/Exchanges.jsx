@@ -502,7 +502,7 @@ function Exchanges() {
             </h2>
 
             {pendingReceivedRequests.length > 0 ? (
-              <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)]">
+              <div className="overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--surface)]">
                 {pendingReceivedRequests.map((request) => (
                   <ExchangeRequestCard
                     key={request.id}
@@ -527,7 +527,7 @@ function Exchanges() {
             </h2>
 
             {pendingSentRequests.length > 0 ? (
-              <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)]">
+              <div className="overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--surface)]">
                 {pendingSentRequests.map((request) => (
                   <ExchangeRequestCard
                     key={request.id}

@@ -253,7 +253,7 @@ function Dashboard() {
             </p>
 
             {recentSentRequests.length > 0 ? (
-              <div className="rounded-xl border border-[var(--border)]">
+              <div className="overflow-x-auto rounded-xl border border-[var(--border)]">
                 {recentSentRequests.map((request) => (
                   <ExchangeRequestRow
                     key={request.id}
@@ -279,7 +279,7 @@ function Dashboard() {
             </p>
 
             {recentReceivedRequests.length > 0 ? (
-              <div className="rounded-xl border border-[var(--border)]">
+              <div className="overflow-x-auto rounded-xl border border-[var(--border)]">
                 {recentReceivedRequests.map((request) => (
                   <ExchangeRequestRow
                     key={request.id}
