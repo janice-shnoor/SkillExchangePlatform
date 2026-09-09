@@ -42,9 +42,9 @@ pnpm-debug.log*
 # Prisma / Avatar
 # ==========================================
 .prisma/
+backend/local_backup.dump
 backend/prisma/migrations/
 backend/uploads/
-frontend/src/assets/
 
 # ================================
 # Temporary files
