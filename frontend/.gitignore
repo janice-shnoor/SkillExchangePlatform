@@ -25,7 +25,7 @@ coverage/
 test-results/
 playwright-report/
 
-# Cache / temporary / assets
+# Cache / temporary 
 .cache/
 .tmp/
 temp/
